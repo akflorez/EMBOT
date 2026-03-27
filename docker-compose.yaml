@@ -30,6 +30,9 @@ services:
       - whatsapp-service
     networks:
       - embot-network
+    labels:
+      - "coolify.managed=true"
+      - "coolify.mapping=80"
 
 networks:
   embot-network:
