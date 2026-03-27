@@ -1,23 +1,10 @@
 version: '3.8'
 
 services:
-  whatsapp-service:
-    build:
-      context: ./whatsapp-service
-      dockerfile: Dockerfile
-    container_name: whatsapp-service
-    restart: always
-    environment:
-      - PORT=3001
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-    expose:
-      - "3001"
-
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: embot-frontend
     restart: always
     expose:
       - "80"
@@ -25,3 +12,14 @@ services:
       - VITE_WA_SERVICE_URL=http://whatsapp-service:3001
     depends_on:
       - whatsapp-service
+
+  whatsapp-service:
+    build:
+      context: ./whatsapp-service
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - PORT=3001
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    expose:
+      - "3001"
