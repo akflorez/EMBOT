@@ -12,7 +12,6 @@ services:
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     volumes:
       - ./whatsapp-service/wa_session_v2:/app/wa_session_v2
-      - ./whatsapp-service/config.json:/app/config.json
     networks:
       - embot-network
 
