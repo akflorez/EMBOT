@@ -112,6 +112,19 @@ export default function DashboardLayout() {
             </button>
           </div>
         </div>
+
+        {/* Bot Profile */}
+        <div className="px-4 py-4 border-t border-border-subtle bg-brand-500/5">
+          <div className="flex items-center gap-3 px-3">
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-brand-500/30 shadow-[0_0_10px_rgba(34,197,94,0.3)]">
+              <img src={botAvatar} alt="Bot" className="w-full h-full object-cover" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-text-main truncate">EMBOT AI</p>
+              <p className="text-[10px] text-text-muted">Asistente Virtual</p>
+            </div>
+          </div>
+        </div>
       </aside>
 
       {/* Main Content */}
