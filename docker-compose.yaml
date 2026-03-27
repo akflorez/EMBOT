@@ -10,13 +10,8 @@ services:
     environment:
       - PORT=3001
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-    volumes:
-      - ./whatsapp-service/wa_session_v2:/app/wa_session_v2
     expose:
       - "3001"
-    networks:
-      - embot-network
-      - coolify
 
   frontend:
     build:
@@ -30,12 +25,3 @@ services:
       - VITE_WA_SERVICE_URL=http://whatsapp-service:3001
     depends_on:
       - whatsapp-service
-    networks:
-      - embot-network
-      - coolify
-
-networks:
-  embot-network:
-    driver: bridge
-  coolify:
-    external: true
