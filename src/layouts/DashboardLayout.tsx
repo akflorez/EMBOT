@@ -18,6 +18,7 @@ import {
   Moon,
   LogOut
 } from 'lucide-react';
+import botAvatar from '../assets/bot-avatar.png';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -140,6 +141,9 @@ export default function DashboardLayout() {
             </button>
           </div>
         </header>
+
+        {/* Bot Profile Section (Bottom of Sidebar logic actually inside Sidebar nav) */}
+
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-8 relative">

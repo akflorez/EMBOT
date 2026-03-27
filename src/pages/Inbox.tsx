@@ -3,6 +3,7 @@ import { WA_API_URL, WA_SOCKET_URL, WA_SOCKET_PATH } from '../config';
 import { io, Socket } from 'socket.io-client';
 import { Send, Bot, User, Sparkles, Filter, MoreVertical, Search, CheckCircle2, MessageSquare, Wifi, WifiOff, FileText, X, Plus, UserPlus, DollarSign, ArrowRight, Settings, RefreshCw } from 'lucide-react';
 import { Card } from '../components/ui/Card';
+import botAvatar from '../assets/bot-avatar.png';
 
 type Message = {
   id: string | number;
@@ -589,15 +590,15 @@ export default function Inbox() {
                 {activeThread?.messages?.map(msg => (
                   <div key={msg.id} className={`flex gap-4 ${msg.sender !== 'ai' ? 'justify-end' : ''}`}>
                     {msg.sender === 'ai' && (
-                      <div className="w-8 h-8 rounded-full bg-brand-600 flex-shrink-0 flex items-center justify-center text-text-main mt-1 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
-                        <Bot className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center mt-1 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+                        <img src={botAvatar} alt="Bot" className="w-full h-full object-cover" />
                       </div>
                     )}
 
                     <div className={`flex flex-col gap-1 max-w-[75%] ${msg.sender !== 'ai' ? 'items-end' : 'items-start'}`}>
                       {msg.sender === 'ai' && (
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-semibold text-brand-600 dark:text-brand-400">BOTemdecob AI</span>
+                          <span className="text-xs font-semibold text-green-600 dark:text-green-400">EMBOT AI</span>
                           <span className="text-[10px] text-text-muted">{msg.time}</span>
                         </div>
                       )}

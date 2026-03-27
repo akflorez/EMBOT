@@ -331,12 +331,20 @@ app.get('/chats', async (req, res) => {
       console.log('[API] ℹ️ La lista de chats está vacía. Es posible que la sincronización esté en curso.');
     }
 
-    const activeChats = await Promise.all(chats.slice(0, 20).map(async (chat) => {
+    // Filter out groups, broadcast and status to avoid 'strange names'
+    const filteredChats = chats.filter(c => !c.isGroup && !c.isReadOnly && !c.id.user.includes('status'));
+
+    const activeChats = await Promise.all(filteredChats.slice(0, 15).map(async (chat) => {
       try {
-        const msgs = await chat.fetchMessages({ limit: 100 });
+        const msgs = await chat.fetchMessages({ limit: 40 });
+        const contact = await chat.getContact().catch(() => ({}));
+        
+        // Resolve a readable name: priority name > pushname > number
+        const resolvedName = contact.name || contact.pushname || chat.name || chat.id.user;
+
         return {
           id: chat.id._serialized,
-          name: chat.name || chat.id.user,
+          name: resolvedName,
           number: chat.id.user,
           avatar: await waClient.getProfilePicUrl(chat.id._serialized).catch(() => null),
           preview: msgs.length > 0 ? msgs[msgs.length - 1].body : '',
@@ -345,8 +353,8 @@ app.get('/chats', async (req, res) => {
           tag: 'WhatsApp',
           messages: await Promise.all(msgs.map(async (m, idx) => {
             let mediaData = null;
-            // Aumentamos a los últimos 12 mensajes para mejor historial
-            const isRecent = idx >= msgs.length - 12;
+            // Solo los últimos 5 para evitar que sea muy pesado
+            const isRecent = idx >= msgs.length - 5;
             const isSupportedMedia = m.hasMedia && ['image', 'sticker', 'video', 'gif'].includes(m.type);
             
             if (isRecent && isSupportedMedia) {
