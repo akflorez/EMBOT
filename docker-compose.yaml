@@ -25,5 +25,3 @@ services:
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     expose:
       - "3001"
-    ports:
-      - "3001:3001"

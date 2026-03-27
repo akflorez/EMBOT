@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { WA_SERVICE_URL } from '../config';
+import { WA_API_URL } from '../config';
 import { Card } from '../components/ui/Card';
 import { Plus, Search, FileText, Edit2, Trash2, Save, X, Layers, MessageSquare, Tag, Sparkles, Link as LinkIcon, ExternalLink, Bot } from 'lucide-react';
 
@@ -112,7 +112,7 @@ export default function Templates() {
     });
 
     try {
-      await fetch(WA_SERVICE_URL + '/config/menu', {
+      await fetch(WA_API_URL + '/config/menu', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: config.enabled, options: fullOptions })
@@ -134,7 +134,7 @@ export default function Templates() {
     }).filter((m: any) => m.keyword && m.content);
 
     try {
-      await fetch(WA_SERVICE_URL + '/config/keywords', {
+      await fetch(WA_API_URL + '/config/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: config.enabled, mappings: fullMappings })
@@ -147,7 +147,7 @@ export default function Templates() {
   const syncAutoResponse = async (config: any) => {
     const template = templates.find(t => t.id === config.templateId);
     try {
-      await fetch(WA_SERVICE_URL + '/config/auto-response', {
+      await fetch(WA_API_URL + '/config/auto-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

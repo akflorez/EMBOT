@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { WA_SERVICE_URL } from '../config';
+import { WA_API_URL, WA_SOCKET_URL, WA_SOCKET_PATH } from '../config';
 import { io, Socket } from 'socket.io-client';
 import { Smartphone, CheckCircle2, RefreshCw, AlertCircle, ShieldCheck, Key, Settings as SettingsIcon, Wifi, WifiOff, QrCode } from 'lucide-react';
 
@@ -35,8 +35,9 @@ export default function Settings() {
 
   // Connect to whatsapp microservice via socket.io
   useEffect(() => {
-    const socket = io(WA_SERVICE_URL, {
+    const socket = io(WA_SOCKET_URL, {
       transports: ['websocket', 'polling'],
+      path: WA_SOCKET_PATH,
       reconnection: true,
       reconnectionDelay: 2000,
     });
@@ -69,7 +70,7 @@ export default function Settings() {
 
   const fetchCoordinators = async () => {
     try {
-      const response = await fetch(WA_SERVICE_URL + '/config/coordinators');
+      const response = await fetch(WA_API_URL + '/config/coordinators');
       if (response.ok) {
         const data = await response.json();
         setCoordinators(data);
@@ -110,7 +111,7 @@ export default function Settings() {
 
     // 2. Try Saving to WhatsApp Service (Coordinators)
     try {
-      const waResp = await fetch(WA_SERVICE_URL + '/config/coordinators', {
+      const waResp = await fetch(WA_API_URL + '/config/coordinators', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(coordinators),
@@ -138,7 +139,7 @@ export default function Settings() {
     if (!confirm('¿Estás seguro de que deseas desconectar la sesión de WhatsApp?')) return;
     setLoading(true);
     try {
-      const resp = await fetch(WA_SERVICE_URL + '/logout', { method: 'POST' });
+      const resp = await fetch(WA_API_URL + '/logout', { method: 'POST' });
       if (resp.ok) {
         setWaStatus('disconnected');
         setWaQR(null);
@@ -160,7 +161,7 @@ export default function Settings() {
     if (confirm('⚠️ ¿Estás seguro de realizar un Reset Total?\n\nEsto cerrará la sesión actual y ELIMINARÁ la caché de conexión. Úsalo si no se ven los chats o si el bot parece bloqueado. El sistema generará un nuevo QR.')) {
       setLoading(true);
       try {
-        const resp = await fetch(WA_SERVICE_URL + '/logout/force', { method: 'POST' });
+        const resp = await fetch(WA_API_URL + '/logout/force', { method: 'POST' });
         if (resp.ok) {
           setWaStatus('disconnected');
           setWaQR(null);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { WA_SERVICE_URL } from '../config';
+import { WA_API_URL, WA_SOCKET_URL, WA_SOCKET_PATH } from '../config';
 import { io, Socket } from 'socket.io-client';
 import { Send, Bot, User, Sparkles, Filter, MoreVertical, Search, CheckCircle2, MessageSquare, Wifi, WifiOff, FileText, X, Plus, UserPlus, DollarSign, ArrowRight, Settings, RefreshCw } from 'lucide-react';
 import { Card } from '../components/ui/Card';
@@ -117,7 +117,7 @@ export default function Inbox() {
   const fetchChats = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch(WA_SERVICE_URL + '/chats');
+      const r = await fetch(WA_API_URL + '/chats');
       const data = await r.json();
       if (data && Array.isArray(data)) {
         setThreads(prev => {
@@ -142,8 +142,9 @@ export default function Inbox() {
 
   useEffect(() => {
     // Connect to whatsapp-service directly for better stability
-    const socket = io(WA_SERVICE_URL, {
+    const socket = io(WA_SOCKET_URL, {
       transports: ['websocket', 'polling'],
+      path: WA_SOCKET_PATH,
       reconnection: true,
     });
     socketRef.current = socket;
@@ -197,7 +198,7 @@ export default function Inbox() {
 
     const fetchSilenced = async () => {
       try {
-        const r = await fetch(WA_SERVICE_URL + '/config/handover/sessions');
+        const r = await fetch(WA_API_URL + '/config/handover/sessions');
         const data = await r.json();
         setActiveSessions(data);
         setSilencedNumbers(Object.keys(data));
@@ -249,7 +250,7 @@ export default function Inbox() {
     // Send via WhatsApp if it's a real thread (not the demo)
     if (activeThread.id !== 'demo' && activeThread.number) {
       try {
-        const res = await fetch(WA_SERVICE_URL + '/send', {
+        const res = await fetch(WA_API_URL + '/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ number: activeThread.id, message: text, agentName }),
@@ -266,7 +267,7 @@ export default function Inbox() {
 
   const reactivateBot = async (number: string) => {
     try {
-      await fetch(WA_SERVICE_URL + '/config/handover/reset', {
+      await fetch(WA_API_URL + '/config/handover/reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ number })
@@ -282,7 +283,7 @@ export default function Inbox() {
     }
 
     try {
-      await fetch(WA_SERVICE_URL + '/config/handover/start', {
+      await fetch(WA_API_URL + '/config/handover/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ number, agentName: agentName })
@@ -293,7 +294,7 @@ export default function Inbox() {
 
   const fetchSilenced = async () => {
     try {
-      const r = await fetch(WA_SERVICE_URL + '/config/handover/sessions');
+      const r = await fetch(WA_API_URL + '/config/handover/sessions');
       const data = await r.json();
       setActiveSessions(data);
       setSilencedNumbers(Object.keys(data));
@@ -307,7 +308,7 @@ export default function Inbox() {
 
   const fetchContacts = async () => {
     try {
-      const r = await fetch(WA_SERVICE_URL + '/contacts');
+      const r = await fetch(WA_API_URL + '/contacts');
       const data = await r.json();
       if (Array.isArray(data)) setContacts(data);
     } catch {}
@@ -925,7 +926,7 @@ export default function Inbox() {
                         setShowAgentModal(false);
                         if (activeThread?.number) {
                            const startHandover = async () => {
-                             await fetch(WA_SERVICE_URL + '/config/handover/start', {
+                             await fetch(WA_API_URL + '/config/handover/start', {
                                method: 'POST',
                                headers: { 'Content-Type': 'application/json' },
                                body: JSON.stringify({ number: activeThread.number, agentName: agentName })
@@ -947,7 +948,7 @@ export default function Inbox() {
                     setShowAgentModal(false);
                     if (activeThread?.number) {
                         try {
-                          await fetch(WA_SERVICE_URL + '/config/handover/start', {
+                          await fetch(WA_API_URL + '/config/handover/start', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ number: activeThread.number, agentName: agentName })
