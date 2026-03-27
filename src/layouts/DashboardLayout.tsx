@@ -114,14 +114,14 @@ export default function DashboardLayout() {
         </div>
 
         {/* Bot Profile */}
-        <div className="px-4 py-4 border-t border-border-subtle bg-brand-500/5">
+        <div className="px-4 py-6 border-t border-border-subtle bg-brand-500/5">
           <div className="flex items-center gap-3 px-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-brand-500/30 shadow-[0_0_10px_rgba(34,197,94,0.3)]">
-              <img src={botAvatar} alt="Bot" className="w-full h-full object-cover" />
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-white border-2 border-brand-500/30 shadow-[0_4px_12px_rgba(34,197,94,0.2)] flex items-center justify-center">
+              <img src={botAvatar} alt="Bot" className="w-[85%] h-[85%] object-contain" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-text-main truncate">EMBOT AI</p>
-              <p className="text-[10px] text-text-muted">Asistente Virtual</p>
+              <p className="text-[13px] font-[800] text-text-main truncate tracking-tight">EMBOT AI</p>
+              <p className="text-[10px] text-text-muted font-medium opacity-70 uppercase tracking-wider">Asistente Virtual</p>
             </div>
           </div>
         </div>
