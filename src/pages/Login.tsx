@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight, MessageCircle, Smartphone, Users, Zap, Shield, Clock } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Shield, Smartphone, Clock } from 'lucide-react';
 import loginHero from '../assets/login-hero.png';
 import colyLogo from '/assets/coly-logo.png';
 
