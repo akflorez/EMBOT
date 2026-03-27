@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DollarSign, Send, Search, TrendingDown, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { Send, Search, TrendingDown, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 
 type DebtStatus = 'Pendiente' | 'Contactado' | 'Acuerdo' | 'Pagado';
 
