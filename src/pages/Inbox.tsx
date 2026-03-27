@@ -415,7 +415,7 @@ export default function Inbox() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`text-xs px-3 py-1 rounded-full whitespace-nowrap transition-colors ${activeTab === tab ? 'bg-[#272a30] text-text-main' : 'bg-transparent border border-border-subtle text-text-muted hover:text-text-main'}`}
+                  className={`text-xs px-3 py-1 rounded-full whitespace-nowrap transition-colors ${activeTab === tab ? 'bg-brand-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300'}`}
                 >
                   {tab}
                 </button>

@@ -129,10 +129,10 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsDark(!isDark)}
-              className="relative p-2 text-text-muted hover:bg-hover rounded-full transition-colors"
+              className={`relative p-2 rounded-full transition-colors ${isDark ? 'bg-indigo-100 text-indigo-600' : 'bg-amber-100 text-amber-600'}`}
               title="Alternar Tema"
             >
-              {isDark ? <Sun className="w-5 h-5 text-yellow-600 dark:text-yellow-500" /> : <Moon className="w-5 h-5 text-indigo-500" />}
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
             <button className="relative p-2 text-text-muted hover:text-text-main transition-colors">
               <Bell className="w-5 h-5" />
