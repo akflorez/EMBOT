@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { WA_API_URL } from '../config';
 import { Card } from '../components/ui/Card';
 import { Plus, Search, FileText, Edit2, Trash2, Save, X, Layers, MessageSquare, Tag, Sparkles, Link as LinkIcon, ExternalLink, Bot } from 'lucide-react';
