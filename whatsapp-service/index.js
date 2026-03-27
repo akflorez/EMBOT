@@ -290,6 +290,10 @@ function initWhatsApp() {
   });
 }
 
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime(), service: 'whatsapp-backend' });
+});
+
 // REST Endpoints
 app.get('/status', (req, res) => {
   res.json({ status: currentStatus, number: connectedNumber, hasQR: !!currentQR });
