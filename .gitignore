@@ -1,0 +1,15 @@
+node_modules/
+.next/
+dist/
+.env
+.DS_Store
+*.local
+.gemini/
+whatsapp-service/node_modules/
+whatsapp-service/config.json
+whatsapp-service/wa_session_v2/
+whatsapp-service/wa_session/
+.git/
+# Ignorar los binarios pesados o cacheados
+.next/
+build/
