@@ -158,81 +158,42 @@ export default function Login() {
       {/* =========================================== */}
       {/* RIGHT PANEL — Hero / Product Showcase        */}
       {/* =========================================== */}
-      <div className="hidden lg:flex flex-1 relative overflow-hidden">
-        {/* Base Gradient */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, #064e3b 0%, #047857 35%, #059669 60%, #10b981 100%)' }}></div>
+      <div className="hidden lg:flex flex-1 relative overflow-hidden bg-[#0f111a]">
+        {/* Subtle Ambient Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-500/10 rounded-full blur-[120px]"></div>
         
-        {/* Animated Grid */}
-        <div className="absolute inset-0 opacity-[0.06]" style={{
-          backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
-        }}></div>
-
-        {/* Glow Orbs */}
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-brand-200/20 rounded-full blur-[120px]"></div>
-        <div className="absolute -bottom-48 -left-48 w-[600px] h-[600px] bg-brand-300/15 rounded-full blur-[120px]"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px]"></div>
-
         {/* Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center w-full px-12 xl:px-20">
+        <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-12 xl:px-20 overflow-hidden">
           
-          {/* Headline */}
-          <div className="text-center mb-12 max-w-lg">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/10 mb-6">
-              <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
-              <span className="text-white/90 text-xs font-semibold">Plataforma activa 24/7</span>
+          {/* Headline - Floating Style */}
+          <div className="text-center mb-0 max-w-lg">
+            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-xl rounded-full px-4 py-1.5 border border-white/10 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]"></div>
+              <span className="text-white/80 text-[11px] font-bold tracking-widest uppercase">Premium Enterprise AI</span>
             </div>
-            <h2 className="text-white text-4xl xl:text-[2.8rem] font-[900] tracking-tight leading-[1.15] mb-5">
-              Gestiona todas tus<br/>
-              <span className="bg-gradient-to-r from-emerald-200 to-green-100 bg-clip-text text-transparent">conversaciones</span><br/>
-              en un solo lugar
-            </h2>
-            <p className="text-emerald-100/60 text-base leading-relaxed">
-              Centraliza WhatsApp, Instagram y más canales con chatbots inteligentes y soporte multiagente.
+          </div>
+
+          {/* Premium Laptop Mockup - Main Focus */}
+          <div className="w-full max-w-[900px] scale-[1.15] xl:scale-[1.35] transition-all duration-700 hover:scale-[1.18] xl:hover:scale-[1.38] mt-8">
+            <img 
+              src={loginHero} 
+              alt="EMBOT Premium Experience"
+              className="w-full h-auto drop-shadow-[0_35px_60px_rgba(0,0,0,0.6)] object-contain"
+            />
+          </div>
+
+          {/* Bottom Branding */}
+          <div className="absolute bottom-12 left-0 right-0 flex flex-col items-center gap-4">
+            <div className="h-px w-24 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+            <p className="text-white/30 text-[11px] font-medium tracking-[0.2em] uppercase">
+              La nueva era de la <span className="text-white/60">automatización inteligente</span>
             </p>
           </div>
-
-          {/* Feature Cards */}
-          <div className="grid grid-cols-3 gap-4 w-full max-w-lg mb-12">
-            {features.map((f, i) => (
-              <div 
-                key={i}
-                className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-5 flex flex-col items-center text-center hover:bg-white/15 hover:border-white/20 transition-all duration-300 group cursor-default"
-              >
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <f.icon className="w-5 h-5 text-emerald-200" />
-                </div>
-                <span className="text-white text-[13px] font-bold mb-0.5">{f.label}</span>
-                <span className="text-emerald-100/50 text-[10px] font-medium leading-tight">{f.desc}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Dashboard Preview */}
-          <div className="w-full max-w-xl relative group">
-            <div className="absolute -inset-4 bg-white/5 rounded-[28px] blur-xl group-hover:bg-white/10 transition-all duration-500"></div>
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/20 border border-white/15 transition-transform duration-500 group-hover:scale-[1.02]">
-              <img 
-                src={loginHero} 
-                alt="EMBOT Dashboard"
-                className="w-full h-auto block"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5"></div>
-            </div>
-          </div>
-
-          {/* Social Proof */}
-          <div className="mt-8 flex items-center gap-6">
-            <div className="flex -space-x-2">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="w-8 h-8 rounded-full bg-white/20 border-2 border-emerald-700 flex items-center justify-center text-white text-[9px] font-bold backdrop-blur-sm">
-                  {['AK','JR','ML','CP'][i-1]}
-                </div>
-              ))}
-            </div>
-            <span className="text-emerald-100/50 text-xs font-medium">+ 500 empresas confían en EMBOT</span>
-          </div>
         </div>
+
+        {/* Floating Decorative Elements */}
+        <div className="absolute top-20 right-20 w-32 h-32 bg-green-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-40 h-40 bg-indigo-500/5 rounded-full blur-3xl"></div>
       </div>
     </div>
   );

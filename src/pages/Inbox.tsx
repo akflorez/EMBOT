@@ -588,10 +588,9 @@ export default function Inbox() {
                   </div>
                 )}
                 {activeThread?.messages?.map(msg => (
-                  <div key={msg.id} className={`flex gap-4 ${msg.sender !== 'ai' ? 'justify-end' : ''}`}>
                     {msg.sender === 'ai' && (
-                      <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center mt-1 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
-                        <img src={botAvatar} alt="Bot" className="w-full h-full object-cover" />
+                      <div className="w-9 h-9 rounded-full overflow-hidden bg-white flex-shrink-0 flex items-center justify-center mt-1 shadow-[0_0_15px_rgba(99,102,241,0.25)] border-2 border-brand-500/20 px-1">
+                        <img src={botAvatar} alt="Bot" className="w-[85%] h-[85%] object-contain" />
                       </div>
                     )}
 
