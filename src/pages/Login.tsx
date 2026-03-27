@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, MessageCircle, Smartphone, Users, Zap, Shield, Clock } from 'lucide-react';
+import loginHero from '../assets/login-hero.png';
+import colyLogo from '/assets/coly-logo.png';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -43,7 +45,7 @@ export default function Login() {
         
         {/* Top: Logo — Centered & Prominent */}
         <div className="flex items-center justify-center w-full mb-6">
-          <img src="/assets/coly-logo.png" alt="EMBOT" className="w-72 object-contain" />
+          <img src={colyLogo} alt="EMBOT" className="w-72 object-contain" />
         </div>
 
         {/* Center: Form */}
@@ -211,7 +213,7 @@ export default function Login() {
             <div className="absolute -inset-4 bg-white/5 rounded-[28px] blur-xl group-hover:bg-white/10 transition-all duration-500"></div>
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/20 border border-white/15 transition-transform duration-500 group-hover:scale-[1.02]">
               <img 
-                src="/assets/dashboard-preview.png" 
+                src={loginHero} 
                 alt="EMBOT Dashboard"
                 className="w-full h-auto block"
               />
