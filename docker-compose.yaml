@@ -22,8 +22,6 @@ services:
       dockerfile: Dockerfile
     container_name: embot-frontend
     restart: always
-    ports:
-      - "80:80"
     environment:
       - VITE_WA_SERVICE_URL=http://whatsapp-service:3001
     depends_on:
