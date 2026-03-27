@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-brand-800: #065f46;
+  --color-brand-900: #064e3b;
+
+  --color-root: var(--color-root-mode);
+  --color-card: var(--color-card-mode);
+  --color-surface: var(--color-surface-mode);
+  --color-hover: var(--color-hover-mode);
+  --color-border-subtle: var(--color-border-mode);
+  --color-text-main: var(--color-text-main-mode);
+  --color-text-muted: var(--color-text-muted-mode);
+}
+
+@layer base {
+  :root {
+    --color-root-mode: #f8fafc;
+    --color-card-mode: #ffffff;
+    --color-surface-mode: #f1f5f9;
+    --color-hover-mode: #e2e8f0;
+    --color-border-mode: #e2e8f0;
+    --color-text-main-mode: #0f172a;
+    --color-text-muted-mode: #64748b;
+  }
+
+  .dark {
+    --color-root-mode: #0f1115;
+    --color-card-mode: #181b21;
+    --color-surface-mode: #14161b;
+    --color-hover-mode: #1e222a;
+    --color-border-mode: #272a30;
+    --color-text-main-mode: #f3f4f6;
+    --color-text-muted-mode: #9ca3af;
+  }
+
+  body {
+    background-color: var(--color-root);
+    color: var(--color-text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom Utilities for Premium Look */
+@layer utilities {
+  .glass-panel {
+    background-color: transparent;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border-subtle);
+  }
+  
+  .dark .glass-panel {
+    background-color: rgba(24, 27, 33, 0.7);
+  }
+  
+  .premium-shadow {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  }
+
+  .cyber-circuit {
+    background-color: #0f1115;
+    background-image: 
+      linear-gradient(rgba(15, 17, 21, 0.4), rgba(15, 17, 21, 0.4)),
+      url('/assets/login-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-login {
+    background: rgba(24, 27, 33, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.1);
+  }
+
+  .neo-glow {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+  }
+
+  .neo-glow-text {
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  }
+
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+
+  @keyframes float-medium {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.05); }
+  }
+
+  @keyframes circuit-line {
+    0% { stroke-dashoffset: 1000; opacity: 0; }
+    50% { opacity: 0.5; }
+    100% { stroke-dashoffset: 0; opacity: 0.1; }
+  }
+
+  .animate-circuit {
+    animation: circuit-line 15s linear infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+  }
+
+  .animate-float-medium {
+    animation: float-medium 5s ease-in-out infinite;
+  }
+
+  .animate-shake {
+    animation: shake 0.2s ease-in-out 0s 2;
+  }
+
+  .circuit-background {
+    background: #ffffff;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.03) 0%, transparent 70%),
+      linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+  }
+
+  .frosted-glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .neo-glow-light {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+  }
+}

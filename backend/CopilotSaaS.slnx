@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CopilotSaaS.Application/CopilotSaaS.Application.csproj" />
+  <Project Path="CopilotSaaS.Domain/CopilotSaaS.Domain.csproj" />
+  <Project Path="CopilotSaaS.Infrastructure/CopilotSaaS.Infrastructure.csproj" />
+  <Project Path="CopilotSaas.WebApi/CopilotSaas.WebApi.csproj" />
+</Solution>

@@ -1,0 +1,11 @@
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\bin\Debug\net10.0\CopilotSaaS.Domain.deps.json
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\bin\Debug\net10.0\CopilotSaaS.Domain.dll
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\bin\Debug\net10.0\CopilotSaaS.Domain.pdb
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\obj\Debug\net10.0\CopilotSaaS.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\obj\Debug\net10.0\CopilotSaaS.Domain.AssemblyInfoInputs.cache
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\obj\Debug\net10.0\CopilotSaaS.Domain.AssemblyInfo.cs
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\obj\Debug\net10.0\CopilotSaaS.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\obj\Debug\net10.0\CopilotSaaS.Domain.dll
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\obj\Debug\net10.0\refint\CopilotSaaS.Domain.dll
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\obj\Debug\net10.0\CopilotSaaS.Domain.pdb
+C:\Users\ANA KARINA\Desktop\bot\backend\CopilotSaaS.Domain\obj\Debug\net10.0\ref\CopilotSaaS.Domain.dll
