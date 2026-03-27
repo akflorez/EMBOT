@@ -92,13 +92,25 @@ function saveConfig() {
 
 function initWhatsApp() {
   waClient = new Client({
-    authStrategy: new LocalAuth({ dataPath: './wa_session_v2' }),
-    puppeteer: {
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    }
-  });
+            authStrategy: new LocalAuth({
+                clientId: 'embot-session',
+                dataPath: './wa_session_v2'
+            }),
+            puppeteer: {
+                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',
+                    '--disable-gpu'
+                ]
+            }
+        });
 
   waClient.on('qr', async (qr) => {
     console.log('[WA] QR recibido, emitiendo al frontend...');
