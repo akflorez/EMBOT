@@ -30,11 +30,6 @@ export default function Login() {
     }
   };
 
-  const features = [
-    { icon: MessageCircle, label: 'Multicanal', desc: 'WhatsApp, Instagram, Messenger' },
-    { icon: Users, label: 'Multiagente', desc: 'Asigna equipos en tiempo real' },
-    { icon: Zap, label: 'Chatbots', desc: 'Automatiza respuestas 24/7' },
-  ];
 
   return (
     <div className="min-h-screen flex bg-[#fafbfc]">
