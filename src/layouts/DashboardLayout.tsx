@@ -16,7 +16,8 @@ import {
   Tag,
   Sun,
   Moon,
-  LogOut
+  LogOut,
+  Headset
 } from 'lucide-react';
 import botAvatar from '../assets/bot-avatar.png';
 
@@ -66,11 +67,14 @@ export default function DashboardLayout() {
       {/* Sidebar */}
       <aside className="w-64 border-r border-border-subtle bg-card flex flex-col transition-all duration-300">
         <div className="h-16 flex items-center px-6 border-b border-border-subtle">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold neo-glow">E</div>
-            <span className="text-xl font-black tracking-tighter" style={{ fontFamily: 'Jost, sans-serif' }}>
-              <span className="text-brand-600">EM</span>
-              <span className="text-[#1e3a8a]">BOT</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-2xl font-black tracking-tighter text-gray-900 dark:text-white relative flex items-center" style={{ fontFamily: 'Jost, sans-serif' }}>
+              c
+              <div className="relative inline-flex items-center justify-center mx-0.5">
+                <Headset className="absolute w-7 h-7 text-brand-600 z-10" strokeWidth={2.5} />
+                <span className="relative z-0 opacity-0">a</span>
+              </div>
+              lly
             </span>
           </div>
         </div>
