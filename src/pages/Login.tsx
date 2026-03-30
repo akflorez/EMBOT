@@ -36,18 +36,18 @@ export default function Login() {
       {/* =========================================== */}
       {/* LEFT PANEL — Login Form                     */}
       {/* =========================================== */}
-      <div className="w-full lg:w-[50%] xl:w-[45%] flex flex-col items-center justify-start px-6 sm:px-12 lg:px-16 xl:px-20 pt-8 pb-6 relative bg-white overflow-y-auto">
+      <div className="w-full lg:w-[50%] xl:w-[45%] flex flex-col items-center justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-8 relative bg-white overflow-y-auto">
         
         {/* Top: Logo — Centered & Prominent */}
         <div className="flex items-center justify-center w-full mb-6">
-          <img src={colyLogo} alt="Cally" className="w-72 object-contain" />
+          <img src={colyLogo} alt="Cally" className="w-48 object-contain" />
         </div>
 
         {/* Center: Form */}
         <div className="w-full max-w-[380px]">
           <div className="mb-6">
             <h2 className="text-[28px] font-[800] text-gray-900 tracking-tight leading-tight">
-              Bienvenido de vuelta
+              Bienvenido
             </h2>
             <p className="text-gray-500 text-[15px] mt-2">
               Ingresa tus credenciales para acceder al panel
