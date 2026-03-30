@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { WA_API_URL } from '../config';
 import { Card } from '../components/ui/Card';
-import { Plus, Search, FileText, Edit2, Trash2, Save, X, Layers, MessageSquare, Tag, Sparkles, Link as LinkIcon, ExternalLink, Bot } from 'lucide-react';
+import { Plus, Search, FileText, Edit2, Trash2, Save, X, Layers, MessageSquare, Tag, Link as LinkIcon, ExternalLink, Bot } from 'lucide-react';
 
 type Template = {
   id: string;
@@ -162,10 +162,7 @@ export default function Templates() {
     }
   };
 
-  const updateMenuConfig = (newConfig: any) => {
-    setMenuConfig(newConfig);
-    localStorage.setItem('chatbot_menu_config', JSON.stringify(newConfig));
-  };
+
 
   const updateKeywordConfig = (newConfig: any) => {
     setKeywordConfig(newConfig);
@@ -249,27 +246,14 @@ export default function Templates() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-brand-600 dark:text-brand-400 border border-brand-500/20">
-              <Sparkles className="w-6 h-6" />
+              <Bot className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-text-main font-semibold">Auto-Respuesta Global</h3>
-              <p className="text-xs text-text-muted">Si alguien te escribe por primera vez, el sistema responderá automáticamente con la plantilla elegida.</p>
+              <h3 className="text-text-main font-semibold">Asistente Cally (Flujo Principal)</h3>
+              <p className="text-xs text-text-muted">Enciende o apaga tu chatbot avanzado de WhatsApp. El flujo y las 5 opciones se manejan desde el servidor.</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-3 bg-surface p-2 rounded-xl border border-border-subtle">
-              <span className="text-xs text-text-muted ml-2">Seleccionar Plantilla:</span>
-              <select 
-                className="bg-surface text-sm text-text-main outline-none px-3 py-1 rounded-lg border border-border-subtle min-w-[200px]"
-                value={autoResponse.templateId}
-                onChange={(e) => updateAutoResponse({ ...autoResponse, templateId: e.target.value })}
-              >
-                <option value="" disabled className="bg-card text-text-main">Selecciona una plantilla...</option>
-                {templates.map(t => (
-                  <option key={t.id} value={t.id} className="bg-card text-text-main">{t.name}</option>
-                ))}
-              </select>
-            </div>
             <button
               onClick={() => updateAutoResponse({ ...autoResponse, enabled: !autoResponse.enabled })}
               className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all border ${
@@ -284,73 +268,6 @@ export default function Templates() {
         </div>
       </Card>
 
-      <Card className="p-6 border-brand-500/20 bg-brand-500/5">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-brand-600 dark:text-brand-400 border border-brand-500/20">
-                <Layers className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-text-main font-semibold">Menú Interactivo (Chatbot)</h3>
-                <p className="text-xs text-text-muted">Envía un menú de opciones después del saludo y responde automáticamente a números.</p>
-              </div>
-            </div>
-            <button
-              onClick={() => updateMenuConfig({ ...menuConfig, enabled: !menuConfig.enabled })}
-              className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all border ${
-                menuConfig.enabled 
-                  ? 'bg-brand-600 border-brand-500 text-text-main shadow-lg shadow-brand-500/20' 
-                  : 'bg-surface border-border-subtle text-text-muted hover:text-text-main'
-              }`}
-            >
-              {menuConfig.enabled ? 'Bot Activado' : 'Bot Desactivado'}
-            </button>
-          </div>
-
-          {menuConfig.enabled && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-2">
-              {[ "1", "2", "3", "4" ].map(num => (
-                <div key={num} className="bg-surface/50 p-4 rounded-xl border border-border-subtle space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-[10px] text-text-muted font-bold uppercase tracking-widest">Opción {num}</label>
-                  </div>
-                  
-                  <div>
-                    <select 
-                      className="w-full bg-surface border border-border-subtle rounded-lg py-1.5 px-3 text-xs text-text-main outline-none focus:border-brand-500"
-                      value={menuConfig.options[num]?.templateId || ''}
-                      onChange={(e) => {
-                        const newOpts = { ...menuConfig.options, [num]: { ...menuConfig.options[num], templateId: e.target.value } };
-                        updateMenuConfig({ ...menuConfig, options: newOpts });
-                      }}
-                    >
-                      <option value="" disabled className="bg-card text-text-main">Asignar plantilla...</option>
-                      {templates.map(t => (
-                        <option key={t.id} value={t.id} className="bg-card text-text-main">{t.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[8px] text-text-muted mb-1 font-bold uppercase tracking-widest pl-1">WhatsApp de Asesores (Separa con ,)</label>
-                    <input 
-                      type="text"
-                      className="w-full bg-card border border-border-subtle rounded-lg py-1 px-3 text-[10px] text-text-main focus:border-brand-500 outline-none"
-                      placeholder="Ej: 57300123, 57310456"
-                      value={menuConfig.options[num]?.agentNumber || ''}
-                      onChange={(e) => {
-                        const newOpts = { ...menuConfig.options, [num]: { ...menuConfig.options[num], agentNumber: e.target.value } };
-                        updateMenuConfig({ ...menuConfig, options: newOpts });
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </Card>
 
       <Card className="p-6 border-brand-500/20 bg-brand-500/5">
         <div className="flex flex-col gap-6">
