@@ -249,7 +249,8 @@ function initWhatsApp() {
               await waClient.sendMessage(from, endMsg);
             } catch (e) { console.error('[Bot] Error final message:', e.message); }
           }, 5000);
-          waitingForOption.set(number, { ...userState, state: 'completed', startTime: Date.now() });
+          waitingForOption.delete(number);
+          humanAgentSessions.set(number, { agentName: 'Asignación Automática', startTime: Date.now() });
         };
 
         if (userState.state === 'main_menu') {
