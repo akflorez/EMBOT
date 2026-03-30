@@ -179,6 +179,16 @@ function initWhatsApp() {
         console.error(`[WA] Error obteniendo contacto para ${number}:`, e.message);
       }
       
+      const bodyClean = msg.body?.trim().toLowerCase() || '';
+
+      // Secret Developer Command to forcefully clear memory blocks for testing
+      if (bodyClean === 'reset cally' || bodyClean === 'reset bot') {
+        humanAgentSessions.delete(number);
+        waitingForOption.delete(number);
+        await waClient.sendMessage(from, '✅ Memoria del bot reiniciada para este número. Ya puedes probar el flujo de nuevo.');
+        return;
+      }
+      
       // 1. Check for Keywords (Priority)
       let keywordTriggered = false;
       if (keywordConfig.enabled && keywordConfig.mappings.length > 0) {
