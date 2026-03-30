@@ -21,6 +21,35 @@ import {
 } from 'lucide-react';
 import botAvatar from '../assets/bot-avatar.png';
 
+const TransparentAvatar = ({ src, className }: { src: string, className?: string }) => {
+  const [imgUrl, setImgUrl] = useState(src);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      // Convert white or near-white pixels to transparent
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i] > 235 && data[i+1] > 235 && data[i+2] > 235) {
+          data[i+3] = 0; // Alpha
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      setImgUrl(canvas.toDataURL());
+    };
+    img.src = src;
+  }, [src]);
+
+  return <img src={imgUrl} alt="Bot Avatar" className={className} />;
+};
+
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Inbox (IA)', path: '/inbox', icon: MessageSquare },
@@ -99,11 +128,11 @@ export default function DashboardLayout() {
 
           {/* Bot Profile */}
           <div className="mt-8 mx-1 p-4 border border-brand-500/20 bg-brand-500/5 rounded-2xl flex flex-col items-center justify-center text-center">
-            <div className="w-24 h-24 mb-3 flex items-center justify-center flex-shrink-0 drop-shadow-[0_8px_16px_rgba(34,197,94,0.3)]">
-              <img src={botAvatar} alt="Bot" className="w-full h-full object-contain" />
+            <div className="w-32 h-32 mb-3 flex items-center justify-center flex-shrink-0 drop-shadow-[0_8px_16px_rgba(34,197,94,0.3)] overflow-visible">
+              <TransparentAvatar src={botAvatar} className="w-[140%] h-[140%] max-w-none object-contain scale-110 drop-shadow-md" />
             </div>
             <div className="min-w-0">
-              <p className="text-[14px] font-[800] text-text-main truncate tracking-tight">Cally</p>
+              <p className="text-[15px] font-[900] text-text-main truncate tracking-tight">Cally</p>
               <p className="text-[11px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-wider mt-1">Asistente Virtual</p>
             </div>
           </div>
