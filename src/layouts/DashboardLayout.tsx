@@ -95,8 +95,8 @@ export default function DashboardLayout() {
 
           {/* Bot Profile */}
           <div className="mt-8 mx-1 p-4 border border-brand-500/20 bg-brand-500/5 rounded-2xl flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 mb-3 rounded-full overflow-hidden bg-white border-2 border-brand-500/30 shadow-[0_4px_12px_rgba(34,197,94,0.2)] flex items-center justify-center flex-shrink-0">
-              <img src={botAvatar} alt="Bot" className="w-[85%] h-[85%] object-contain" />
+            <div className="w-24 h-24 mb-3 flex items-center justify-center flex-shrink-0 drop-shadow-[0_8px_16px_rgba(34,197,94,0.3)]">
+              <img src={botAvatar} alt="Bot" className="w-full h-full object-contain" />
             </div>
             <div className="min-w-0">
               <p className="text-[14px] font-[800] text-text-main truncate tracking-tight">Cally</p>
