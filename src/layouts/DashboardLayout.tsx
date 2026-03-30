@@ -97,7 +97,7 @@ export default function DashboardLayout() {
       <aside className="w-64 border-r border-border-subtle bg-card flex flex-col transition-all duration-300">
         <div className="h-16 flex items-center px-6 border-b border-border-subtle">
           <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black tracking-tighter text-gray-900 dark:text-white relative flex items-center" style={{ fontFamily: 'Jost, sans-serif' }}>
+            <span className="text-2xl font-black tracking-tighter text-black dark:text-white relative flex items-center" style={{ fontFamily: 'Jost, sans-serif' }}>
               c
               <div className="relative inline-flex items-center justify-center mx-0.5">
                 <Headset className="absolute w-7 h-7 text-brand-600 z-10" strokeWidth={2.5} />
@@ -129,7 +129,7 @@ export default function DashboardLayout() {
           {/* Bot Profile */}
           <div className="mt-8 mx-1 p-4 border border-brand-500/20 bg-brand-500/5 rounded-2xl flex flex-col items-center justify-center text-center">
             <div className="w-32 h-32 mb-3 flex items-center justify-center flex-shrink-0 drop-shadow-[0_8px_16px_rgba(34,197,94,0.3)] overflow-visible">
-              <TransparentAvatar src={botAvatar} className="w-[140%] h-[140%] max-w-none object-contain scale-110 drop-shadow-md" />
+              <TransparentAvatar src={botAvatar} className="w-[180%] h-[180%] max-w-none object-contain scale-110 drop-shadow-md pb-4" />
             </div>
             <div className="min-w-0">
               <p className="text-[15px] font-[900] text-text-main truncate tracking-tight">Cally</p>
