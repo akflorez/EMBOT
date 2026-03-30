@@ -393,7 +393,7 @@ app.get('/chats', async (req, res) => {
 
     const activeChats = await Promise.all(filteredChats.slice(0, 15).map(async (chat) => {
       try {
-        const msgs = await chat.fetchMessages({ limit: 40 });
+        const msgs = await chat.fetchMessages({ limit: 20 });
         const contact = await chat.getContact().catch(() => ({}));
         
         // Resolve a readable name: priority name > pushname > number
@@ -409,29 +409,8 @@ app.get('/chats', async (req, res) => {
           unread: chat.unreadCount,
           tag: 'WhatsApp',
           messages: await Promise.all(msgs.map(async (m, idx) => {
+            // Media bulk download has been disabled to prevent extreme latency and timeouts.
             let mediaData = null;
-            // Solo los últimos 5 para evitar que sea muy pesado
-            const isRecent = idx >= msgs.length - 5;
-            const isSupportedMedia = m.hasMedia && ['image', 'sticker', 'video', 'gif'].includes(m.type);
-            
-            if (isRecent && isSupportedMedia) {
-              try {
-                // Implementamos timeout de 5s por media para evitar que se cuelgue el API
-                const media = await Promise.race([
-                  m.downloadMedia(),
-                  new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-                ]);
-                
-                if (media) {
-                  mediaData = `data:${media.mimetype};base64,${media.data}`;
-                }
-              } catch (e) {
-                // Logueamos pero no bloqueamos el retorno de los chats
-                if (e.message !== 'Timeout') {
-                  console.error(`[WA] Error media (${m.type}):`, e.message);
-                }
-              }
-            }
             return {
               id: m.id._serialized,
               text: m.body,

@@ -633,9 +633,8 @@ export default function Inbox() {
                           <div className="space-y-1">
                             {msg.text && <p>{msg.text}</p>}
                             {msg.hasMedia && !msg.mediaData && (
-                              <div className="flex items-center gap-1.5 text-[10px] text-text-muted bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-border-subtle/50">
-                                <WifiOff className="w-3 h-3" />
-                                <span>Archivo multimedia no disponible para vista previa</span>
+                              <div className="flex items-center gap-1.5 text-[11px] text-brand-600 dark:text-brand-400 bg-brand-500/10 px-3 py-2 rounded-lg border border-brand-500/20 font-medium">
+                                <span className="text-lg">📷</span> <span>Archivo Multimedia Recibido (Ver en app)</span>
                               </div>
                             )}
                           </div>
