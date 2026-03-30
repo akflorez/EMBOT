@@ -92,11 +92,22 @@ export default function DashboardLayout() {
               {item.name}
             </NavLink>
           ))}
+
+          {/* Bot Profile */}
+          <div className="mt-8 mx-1 p-4 border border-brand-500/20 bg-brand-500/5 rounded-2xl flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 mb-3 rounded-full overflow-hidden bg-white border-2 border-brand-500/30 shadow-[0_4px_12px_rgba(34,197,94,0.2)] flex items-center justify-center flex-shrink-0">
+              <img src={botAvatar} alt="Bot" className="w-[85%] h-[85%] object-contain" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[14px] font-[800] text-text-main truncate tracking-tight">Cally</p>
+              <p className="text-[11px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-wider mt-1">Asistente Virtual</p>
+            </div>
+          </div>
         </nav>
 
-        <div className="p-4 border-t border-border-subtle">
+        <div className="p-4 border-t border-border-subtle mt-auto">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center font-bold text-xs">
+            <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center font-bold text-xs text-white">
               AK
             </div>
             <div className="flex flex-col">
@@ -110,19 +121,6 @@ export default function DashboardLayout() {
             >
               <LogOut className="w-4 h-4" />
             </button>
-          </div>
-        </div>
-
-        {/* Bot Profile */}
-        <div className="px-4 py-6 border-t border-border-subtle bg-brand-500/5">
-          <div className="flex items-center gap-3 px-3">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-white border-2 border-brand-500/30 shadow-[0_4px_12px_rgba(34,197,94,0.2)] flex items-center justify-center">
-              <img src={botAvatar} alt="Bot" className="w-[85%] h-[85%] object-contain" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[13px] font-[800] text-text-main truncate tracking-tight">EMBOT AI</p>
-              <p className="text-[10px] text-text-muted font-medium opacity-70 uppercase tracking-wider">Asistente Virtual</p>
-            </div>
           </div>
         </div>
       </aside>

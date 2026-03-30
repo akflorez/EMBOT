@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Shield, Smartphone, Clock } from 'lucide-react';
 import loginHero from '../assets/login-hero.png';
-import colyLogo from '/assets/coly-logo.png';
+import colyLogo from '/assets/cally-logo.png';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -40,7 +40,7 @@ export default function Login() {
         
         {/* Top: Logo — Centered & Prominent */}
         <div className="flex items-center justify-center w-full mb-6">
-          <img src={colyLogo} alt="EMBOT" className="w-72 object-contain" />
+          <img src={colyLogo} alt="Cally" className="w-72 object-contain" />
         </div>
 
         {/* Center: Form */}
@@ -145,7 +145,7 @@ export default function Login() {
         {/* Bottom: Footer */}
         <div className="text-center">
           <p className="text-gray-300 text-[11px]">
-            © {new Date().getFullYear()} EMBOT · Powered by <span className="font-semibold text-gray-400">EMDECOB</span>
+            © {new Date().getFullYear()} Cally · Powered by <span className="font-semibold text-gray-400">EMDECOB</span>
           </p>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function Login() {
           <div className="w-full max-w-[900px] scale-[1.15] xl:scale-[1.35] transition-all duration-700 hover:scale-[1.18] xl:hover:scale-[1.38] mt-8">
             <img 
               src={loginHero} 
-              alt="EMBOT Premium Experience"
+              alt="Cally Premium Experience"
               className="w-full h-auto drop-shadow-[0_35px_60px_rgba(0,0,0,0.6)] object-contain"
             />
           </div>

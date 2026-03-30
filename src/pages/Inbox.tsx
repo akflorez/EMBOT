@@ -598,7 +598,7 @@ export default function Inbox() {
                     <div className={`flex flex-col gap-1 max-w-[75%] ${msg.sender !== 'ai' ? 'items-end' : 'items-start'}`}>
                       {msg.sender === 'ai' && (
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-semibold text-green-600 dark:text-green-400">EMBOT AI</span>
+                          <span className="text-xs font-semibold text-green-600 dark:text-green-400">Cally</span>
                           <span className="text-[10px] text-text-muted">{msg.time}</span>
                         </div>
                       )}

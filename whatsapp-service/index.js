@@ -47,7 +47,11 @@ let coordinatorConfig = {
   efigas: '573000000001',
   ph: '573000000002',
   fna: '573000000003',
-  crediorbe: '573000000004'
+  crediorbe: '573000000004',
+  cartera: '',
+  contact_center: '',
+  emdata: '',
+  juridica: ''
 };
 const autoRespondedNumbers = new Set();
 const waitingForOption = new Map(); // number -> { timestamp, state, portfolio, startTime }
@@ -193,82 +197,135 @@ function initWhatsApp() {
         }
       }
 
+      // Helper for Business Hours
+      const isBusinessHours = () => {
+        // America/Bogota time
+        const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bogota" }));
+        const day = now.getDay();
+        const hour = now.getHours();
+        
+        // M-F (1 to 5)
+        if (day === 0 || day === 6) return false;
+        
+        // 8 AM to 11:59 AM (8 <= hour < 12) OR 1 PM to 4:59 PM (13 <= hour < 17)
+        if ((hour >= 8 && hour < 12) || (hour >= 13 && hour < 17)) {
+          return true;
+        }
+        return false;
+      };
+
       // Check if bot is silenced for this user (Handover to Human)
       if (humanAgentSessions.has(number)) {
         console.log(`[WA] 👤 Silenciando bot para ${number} (Atención Humana)`);
-      } else if (!keywordTriggered && autoResponseConfig.enabled && !autoRespondedNumbers.has(number) && !waitingForOption.has(number)) {
-        // FIRST MESSAGE: Welcome & Portfolio Selection
-        try {
-          const media = MessageMedia.fromFilePath(IMG_WELCOME);
-          await waClient.sendMessage(from, media);
-        } catch (e) {
-          console.error('[Embot] Error enviando imagen de bienvenida:', e.message);
+      } else if (!keywordTriggered && autoResponseConfig.enabled && !waitingForOption.has(number)) {
+        // FIRST MESSAGE
+        const inHours = isBusinessHours();
+        
+        if (!inHours) {
+          const outOfHoursMsg = `Hola 👋 gracias por escribirnos a EMDECOB.\nEn este momento estamos fuera de nuestro horario de atención.\n\nHorario de atención:\nLunes a viernes de 8:00 a. m. a 12:00 m. y de 1:00 p. m. a 5:00 p. m.\nNo atendemos sábados, domingos ni festivos.\n\nPor favor, déjanos tu nombre completo y tu mensaje, y te responderemos en nuestro próximo horario hábil 🙌`;
+          await waClient.sendMessage(from, outOfHoursMsg);
+          waitingForOption.set(number, { state: 'awaiting_out_of_hours_data', originalFrom: from, startTime: Date.now() });
+        } else {
+          try {
+            const media = MessageMedia.fromFilePath(IMG_WELCOME);
+            await waClient.sendMessage(from, media);
+          } catch (e) {
+            console.error('[Cally] Error enviando imagen de bienvenida:', e.message);
+          }
+          
+          const menuMsg = `Hola 👋 gracias por escribirnos a EMDECOB.\nCuéntanos, ¿en qué podemos ayudarte hoy?\n\n1. Manejo de cartera (recuperación de cartera)\n2. Contact center (ventas, servicio o recaudo)\n3. Analítica de datos – EMDATA (tableros en Power BI)\n4. Asesoría jurídica\n5. Servicio al cliente (consulta de deuda o información)\n\nResponde con el número de la opción 👇`;
+          await waClient.sendMessage(from, menuMsg);
+          waitingForOption.set(number, { state: 'main_menu', originalFrom: from, startTime: Date.now() });
         }
-        
-        const welcomeMsg = `Hola 👋, soy Embot, asistente virtual de EMDECOB.\nSi deseas consultar información sobre tu deuda, por favor indícame a qué portafolio pertenece:\n\n1. *Efigas*\n2. *Propiedad Horizontal*\n3. *FNA*\n4. *Crediorbe*\n\nPor favor, escribe el nombre del portafolio o el número de la opción.`;
-        await waClient.sendMessage(from, welcomeMsg);
-        autoRespondedNumbers.add(number);
-        waitingForOption.set(number, { 
-          timestamp: Date.now(), 
-          state: 'choosing_portfolio',
-          originalFrom: from // Store full JID
-        });
-      }
-
-      // Handle numeric/portfolio options
-      if (waitingForOption.has(number) && !humanAgentSessions.has(number)) {
+      } else if (waitingForOption.has(number) && !humanAgentSessions.has(number)) {
         const body = msg.body.trim().toLowerCase();
-        const userState = waitingForOption.get(number);
+        let userState = waitingForOption.get(number);
         
-        // STATE: CHOOSING PORTFOLIO
-        if (userState.state === 'choosing_portfolio') {
-          const portfolioMap = {
-            "1": { name: "Efigas", coord: coordinatorConfig.efigas },
-            "efigas": { name: "Efigas", coord: coordinatorConfig.efigas },
-            "2": { name: "Propiedad Horizontal", coord: coordinatorConfig.ph },
-            "propiedad horizontal": { name: "Propiedad Horizontal", coord: coordinatorConfig.ph },
-            "3": { name: "FNA", coord: coordinatorConfig.fna },
-            "fna": { name: "FNA", coord: coordinatorConfig.fna },
-            "4": { name: "Crediorbe", coord: coordinatorConfig.crediorbe },
-            "crediorbe": { name: "Crediorbe", coord: coordinatorConfig.crediorbe }
-          };
+        // Helper to complete flow
+        const completeFlow = async () => {
+          setTimeout(async () => {
+            const endMsg = `Gracias por tu información. Pronto uno de nuestros agentes te atenderá 🙌`;
+            try {
+              await waClient.sendMessage(from, endMsg);
+            } catch (e) { console.error('[Bot] Error final message:', e.message); }
+          }, 5000);
+          waitingForOption.set(number, { ...userState, state: 'completed', startTime: Date.now() });
+        };
 
-          const selected = portfolioMap[body];
-          if (selected) {
-            console.log(`[Embot] 🎯 Selección detectada: ${selected.name} para el número ${number}. Coordinador: ${selected.coord}`);
-            const dataRequestMsg = `Por favor envíame la siguiente información para continuar con tu solicitud:\n\n- *Nombre completo*\n- *Número de identificación*\n\nUna vez nos compartas estos datos, un agente se comunicará contigo.`;
-            await waClient.sendMessage(from, dataRequestMsg);
-            
-            // ALERT COORDINATOR
-            console.log(`[Embot] 🆘 Intentando enviar alerta a ${selected.coord}...`);
-            const alertMsg = `🆘 *Alerta de Portafolio - EMBOT*\n\nEl cliente *${contact.pushname || number}* (${number}) ha seleccionado el portafolio: *${selected.name}*.\n\nPor favor, revisa el Inbox para atender.`;
-            await sendAlertToAgents(selected.coord, alertMsg);
-            
-            // Change state and wait for Name/ID
-            waitingForOption.set(number, { 
-              ...userState, 
-              state: 'awaiting_data', 
-              portfolio: selected.name,
-              startTime: Date.now() 
-            });
+        if (userState.state === 'main_menu') {
+          if (body === '1' || body.includes('manejo') || body.includes('cartera')) {
+            const reply = `Perfecto 👌\nEn EMDECOB te ayudamos a recuperar cartera de forma estratégica, priorizando, segmentando y optimizando cada gestión para lograr resultados reales.\n\nPor favor indícanos:\n\n- tu nombre completo\n- si tu cartera es administrativa o jurídica\n- de qué sector es`;
+            await waClient.sendMessage(from, reply);
+            waitingForOption.set(number, { ...userState, state: 'awaiting_opt1_data' });
+          } else if (body === '2' || body.includes('contact center')) {
+            const reply = `Perfecto 👌\nNuestro servicio de contact center está enfocado en resultados: ventas, recaudo y servicio al cliente, con procesos estructurados y medición constante.\n\nPor favor indícanos:\n\n- tu nombre completo\n- qué deseas mejorar:\n  • Ventas\n  • Servicio\n  • Recaudo`;
+            await waClient.sendMessage(from, reply);
+            waitingForOption.set(number, { ...userState, state: 'awaiting_opt2_data' });
+          } else if (body === '3' || body.includes('emdata') || body.includes('analítica')) {
+            const reply = `Perfecto 👌\nCon EMDATA llevamos tu información a otro nivel con tableros en Power BI y asesoría personalizada.\n\nPor favor indícanos:\n\n- tu nombre completo\n- qué te gustaría medir o mejorar en tu negocio`;
+            await waClient.sendMessage(from, reply);
+            waitingForOption.set(number, { ...userState, state: 'awaiting_opt3_data' });
+          } else if (body === '4' || body.includes('jurídica') || body.includes('juridica') || body.includes('asesoría')) {
+            const reply = `Perfecto 👌\nSabemos que estos procesos pueden ser complejos, pero con el acompañamiento adecuado todo se vuelve mucho más claro.\n\nEn EMDECOB te guiamos paso a paso para proteger tus intereses y avanzar de forma segura.\n\nPor favor indícanos:\n\n- tu nombre completo\n- un breve resumen de tu caso`;
+            await waClient.sendMessage(from, reply);
+            waitingForOption.set(number, { ...userState, state: 'awaiting_opt4_data' });
+          } else if (body === '5' || body.includes('servicio')) {
+            const reply = `Perfecto 👌\nPara ayudarte con tu solicitud, selecciona el portafolio:\n\n1. Crediorbe\n2. Efigas\n3. FNA\n4. Propiedad horizontal\n\nResponde con el número de la opción 👇`;
+            await waClient.sendMessage(from, reply);
+            waitingForOption.set(number, { ...userState, state: 'awaiting_opt5_portafolio' });
+          } else {
+            const errorMsg = `Por favor responde con el número de una de las opciones disponibles 👇`;
+            await waClient.sendMessage(from, errorMsg);
           }
         } 
-        // STATE: AWAITING DATA (User is typing Name/ID)
-        else if (userState.state === 'awaiting_data') {
-          console.log(`[WA] 🤖 Datos recibidos de ${number}: "${msg.body}"`);
-          // Mark as data received and reset timer to wait 1 minute FROM NOW
-          waitingForOption.set(number, {
-            ...userState,
-            state: 'data_received',
-            startTime: Date.now()
-          });
+        else if (userState.state === 'awaiting_opt5_portafolio') {
+          const portfolioMap = {
+            "1": { name: "Crediorbe", coord: coordinatorConfig.crediorbe },
+            "crediorbe": { name: "Crediorbe", coord: coordinatorConfig.crediorbe },
+            "2": { name: "Efigas", coord: coordinatorConfig.efigas },
+            "efigas": { name: "Efigas", coord: coordinatorConfig.efigas },
+            "3": { name: "FNA", coord: coordinatorConfig.fna },
+            "fna": { name: "FNA", coord: coordinatorConfig.fna },
+            "4": { name: "Propiedad horizontal", coord: coordinatorConfig.ph },
+            "propiedad": { name: "Propiedad horizontal", coord: coordinatorConfig.ph },
+            "horizontal": { name: "Propiedad horizontal", coord: coordinatorConfig.ph },
+            "propiedad horizontal": { name: "Propiedad horizontal", coord: coordinatorConfig.ph }
+          };
+          const selected = portfolioMap[body];
+          if (selected) {
+             const dataRequestMsg = `Por favor indícanos:\n\n- tu nombre completo\n- tu número de cédula`;
+             await waClient.sendMessage(from, dataRequestMsg);
+             waitingForOption.set(number, { ...userState, state: 'awaiting_opt5_data', portfolio: selected });
+          } else {
+             const errorMsg = `Por favor selecciona correctamente el portafolio:\n\n1. Crediorbe\n2. Efigas\n3. FNA\n4. Propiedad horizontal\n\nResponde con el número de la opción 👇`;
+             await waClient.sendMessage(from, errorMsg);
+          }
+        }
+        else if (userState.state.startsWith('awaiting_opt') || userState.state === 'awaiting_out_of_hours_data') {
+          const numberAlertMsg = `🆘 *Alerta de Lead - Cally*\n\nEl cliente *${contact.pushname || number}* (${number}) ha ingresado sus datos y requiere atención humana.\n\nPor favor, revisa el Inbox.`;
+
+          if (userState.state === 'awaiting_opt5_data' && userState.portfolio) {
+            console.log(`[Cally] 🆘 Intentando enviar alerta a ${userState.portfolio.coord}...`);
+            const alertMsg = `🆘 *Alerta de Portafolio - Cally*\n\nEl cliente *${contact.pushname || number}* (${number}) ha seleccionado el portafolio: *${userState.portfolio.name}*.\n\nPor favor, revisa el Inbox para atender.`;
+            await sendAlertToAgents(userState.portfolio.coord, alertMsg);
+          } else if (userState.state === 'awaiting_opt1_data' && coordinatorConfig.cartera) {
+            await sendAlertToAgents(coordinatorConfig.cartera, numberAlertMsg + "\nOpción: Manejo de Cartera");
+          } else if (userState.state === 'awaiting_opt2_data' && coordinatorConfig.contact_center) {
+            await sendAlertToAgents(coordinatorConfig.contact_center, numberAlertMsg + "\nOpción: Contact Center");
+          } else if (userState.state === 'awaiting_opt3_data' && coordinatorConfig.emdata) {
+            await sendAlertToAgents(coordinatorConfig.emdata, numberAlertMsg + "\nOpción: EMDATA");
+          } else if (userState.state === 'awaiting_opt4_data' && coordinatorConfig.juridica) {
+            await sendAlertToAgents(coordinatorConfig.juridica, numberAlertMsg + "\nOpción: Asesoría Jurídica");
+          }
+          
+          await completeFlow();
         }
       }
 
       const inboxMsg = {
         id: msg.id._serialized,
         chatId: from,
-        from: contact.pushname || contact.name || contact.number || number,
+        from: contact.name || contact.pushname || contact.number || number,
         number: number,
         text: msg.body,
         time: new Date(msg.timestamp * 1000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
@@ -502,12 +559,16 @@ app.get('/config/coordinators', (req, res) => {
 
 app.post('/config/coordinators', (req, res) => {
   console.log('[WA] Recibida nueva configuración de coordinadores:', req.body);
-  const { efigas, ph, fna, crediorbe } = req.body;
+  const { efigas, ph, fna, crediorbe, cartera, contact_center, emdata, juridica } = req.body;
   coordinatorConfig = {
     efigas: efigas || coordinatorConfig.efigas,
     ph: ph || coordinatorConfig.ph,
     fna: fna || coordinatorConfig.fna,
-    crediorbe: crediorbe || coordinatorConfig.crediorbe
+    crediorbe: crediorbe || coordinatorConfig.crediorbe,
+    cartera: cartera || coordinatorConfig.cartera,
+    contact_center: contact_center || coordinatorConfig.contact_center,
+    emdata: emdata || coordinatorConfig.emdata,
+    juridica: juridica || coordinatorConfig.juridica
   };
   saveConfig();
   res.json({ ok: true, config: coordinatorConfig });
@@ -531,6 +592,7 @@ app.post('/config/handover/reset', (req, res) => {
   const { number } = req.body;
   if (number) {
     humanAgentSessions.delete(number);
+    waitingForOption.delete(number); // Allow bot to run welcome flow again
     console.log(`[WA] Bot reactivado para: ${number}`);
     res.json({ ok: true });
   } else {
@@ -649,37 +711,4 @@ server.listen(PORT, () => {
   loadConfig();
   initWhatsApp();
 });
-
-// Background timer for "Agents Busy" message (after 10 seconds of silence in 'data_received')
-setInterval(async () => {
-  const now = Date.now();
-  if (waitingForOption.size > 0) {
-    console.log(`[Timer] 🤖 Revisando ${waitingForOption.size} usuarios. Tiempo actual: ${new Date().toLocaleTimeString()}`);
-  }
-  
-  for (const [number, state] of waitingForOption.entries()) {
-    // Si ya enviaron sus datos y pasaron 10 SEGUNDOS (antes 1 min) de silencio, enviar mensaje de espera
-    if (state.state === 'data_received' && (now - state.startTime) > 10000) {
-      console.log(`[Timer] 🤖 Enviando mensaje de espera a ${number} (10s superados)`);
-      const from = state.originalFrom || `${number}@c.us`; 
-      try {
-        // Imagen de espera deshabilitada temporalmente por error tipográfico (Estamos conmigo)
-        /*
-        try {
-          const media = MessageMedia.fromFilePath(IMG_WAIT);
-          await waClient.sendMessage(from, media);
-        } catch (e) {
-          console.error('[Timer] Error enviando imagen de espera:', e.message);
-        }
-        */
-
-        const waitMsg = `Gracias por tu información.\nEn este momento nuestros agentes se encuentran ocupados, pero pronto uno de ellos te atenderá.\n\nAgradecemos tu tiempo y tu espera. 🙏`;
-        await waClient.sendMessage(from, waitMsg);
-        // Move to notified_wait so we don't repeat the message
-        waitingForOption.set(number, { ...state, state: 'notified_wait' });
-      } catch (e) {
-        console.error(`[Timer] Error enviando a ${number}:`, e.message);
-      }
-    }
-  }
-}, 5000); // Check every 5s for precision
+// Old background timer removed as timeout is now handled directly via completeFlow()

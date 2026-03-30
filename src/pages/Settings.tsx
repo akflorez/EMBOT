@@ -30,7 +30,11 @@ export default function Settings() {
     efigas: '',
     ph: '',
     fna: '',
-    crediorbe: ''
+    crediorbe: '',
+    cartera: '',
+    contact_center: '',
+    emdata: '',
+    juridica: ''
   });
 
   // Connect to whatsapp microservice via socket.io
@@ -205,12 +209,33 @@ export default function Settings() {
         </div>
         <h2 className="text-xl text-text-main font-semibold mb-2 flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-          Gestión de Coordinadores (Embot)
+          Gestión de Coordinadores (Cally)
         </h2>
         <p className="text-xs text-text-muted mb-6">Configura los números de WhatsApp que recibirán las alertas según el portafolio seleccionado por el cliente.</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Lado Izquierdo */}
           <div className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Manejo de Cartera</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.cartera}
+                onChange={e => setCoordinators({ ...coordinators, cartera: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Contact Center</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.contact_center}
+                onChange={e => setCoordinators({ ...coordinators, contact_center: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
             <div>
               <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Efigas</label>
               <input
@@ -232,7 +257,29 @@ export default function Settings() {
               />
             </div>
           </div>
+
+          {/* Lado Derecho */}
           <div className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">EMDATA (Analítica)</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.emdata}
+                onChange={e => setCoordinators({ ...coordinators, emdata: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Asesoría Jurídica</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.juridica}
+                onChange={e => setCoordinators({ ...coordinators, juridica: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
             <div>
               <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">FNA</label>
               <input
