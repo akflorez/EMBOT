@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Shield, Smartphone, Clock } from 'lucide-react';
 import loginHero from '../assets/login-hero.png';
-import colyLogo from '/assets/cally-logo.png';
+import callyLogoBlack from '../assets/logo-black.png';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -17,9 +17,25 @@ export default function Login() {
     setIsLoading(true);
     setError('');
 
-    if (username.toUpperCase() === 'EMDECOB' && password === '270227') {
+    // Credenciales mapeadas (Esto vendría de una API real en produccion)
+    const validUsers: Record<string, { pass: string, role: string, portfolio?: string }> = {
+      'EMDECOB': { pass: '270227', role: 'admin' },
+      'EFIGAS': { pass: '262501', role: 'user', portfolio: 'Efigas' },
+      'PROPIEDAD HORIZONTAL': { pass: '292509', role: 'user', portfolio: 'Propiedad Horizontal' },
+      'FNA': { pass: '102507', role: 'user', portfolio: 'FNA' },
+      'CALIDAD': { pass: '251410', role: 'user' },
+      'EMPRESARIAL': { pass: '251016', role: 'user' }
+    };
+
+    const userKey = username.toUpperCase();
+    const userData = validUsers[userKey];
+
+    if (userData && userData.pass === password) {
       setTimeout(() => {
         localStorage.setItem('emdecob_auth', 'true');
+        localStorage.setItem('user_role', userData.role);
+        localStorage.setItem('user_portfolio', userData.portfolio || '');
+        localStorage.setItem('user_name', userKey);
         navigate('/dashboard');
       }, 1200);
     } else {
@@ -39,8 +55,8 @@ export default function Login() {
       <div className="w-full lg:w-[50%] xl:w-[45%] flex flex-col items-center justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-8 relative bg-white overflow-y-auto">
         
         {/* Top: Logo — Centered & Prominent */}
-        <div className="flex items-center justify-center w-full mb-6">
-          <img src={colyLogo} alt="Cally" className="w-48 object-contain" />
+        <div className="flex items-center justify-center w-full mb-8 pt-4">
+          <img src={callyLogoBlack} alt="Cally" className="w-56 h-auto object-contain" />
         </div>
 
         {/* Center: Form */}

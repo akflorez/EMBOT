@@ -1,4 +1,3 @@
-
 import { Outlet, NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { 
@@ -20,35 +19,8 @@ import {
   Headset
 } from 'lucide-react';
 import botAvatar from '../assets/bot-avatar.png';
-
-const TransparentAvatar = ({ src, className }: { src: string, className?: string }) => {
-  const [imgUrl, setImgUrl] = useState(src);
-
-  useEffect(() => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) return;
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      // Convert white or near-white pixels to transparent
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i] > 235 && data[i+1] > 235 && data[i+2] > 235) {
-          data[i+3] = 0; // Alpha
-        }
-      }
-      ctx.putImageData(imageData, 0, 0);
-      setImgUrl(canvas.toDataURL());
-    };
-    img.src = src;
-  }, [src]);
-
-  return <img src={imgUrl} alt="Bot Avatar" className={className} />;
-};
+import callyLogoWhite from '../assets/logo-white.png';
+import callyLogoBlack from '../assets/logo-black.png';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -95,17 +67,12 @@ export default function DashboardLayout() {
       
       {/* Sidebar */}
       <aside className="w-64 border-r border-border-subtle bg-card flex flex-col transition-all duration-300">
-        <div className="h-16 flex items-center px-6 border-b border-border-subtle">
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black tracking-tighter text-text-main relative flex items-center" style={{ fontFamily: 'Jost, sans-serif' }}>
-              c
-              <div className="relative inline-flex items-center justify-center mx-0.5">
-                <Headset className="absolute w-7 h-7 text-brand-600 z-10" strokeWidth={2.5} />
-                <span className="relative z-0 opacity-0">a</span>
-              </div>
-              lly
-            </span>
-          </div>
+        <div className="h-20 flex items-center px-6 border-b border-border-subtle">
+           <img 
+            src={isDark ? callyLogoWhite : callyLogoBlack} 
+            alt="Cally" 
+            className="h-10 w-auto object-contain" 
+          />
         </div>
 
         <nav className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col py-4 px-3 space-y-1">
@@ -128,8 +95,8 @@ export default function DashboardLayout() {
 
           {/* Bot Profile */}
           <div className="mt-auto pt-6 pb-2 mx-1 flex flex-col items-center justify-end flex-grow text-center overflow-hidden">
-            <div className="w-full h-40 flex justify-center items-end flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.4)] overflow-visible">
-              <TransparentAvatar src={botAvatar} className="w-[180%] h-[180%] max-w-none object-contain scale-125 drop-shadow-xl translate-y-3" />
+            <div className="w-full h-40 flex justify-center items-end flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)] overflow-visible">
+              <img src={botAvatar} alt="Bot" className="w-[180%] h-[180%] max-w-none object-contain scale-125 drop-shadow-xl translate-y-3" />
             </div>
             <div className="z-10 bg-card/80 backdrop-blur-sm -mt-4 px-4 py-1.5 rounded-full shadow-sm border border-border-subtle/50">
               <p className="text-[17px] font-[900] text-text-main tracking-tight leading-none">Cally</p>
@@ -185,9 +152,6 @@ export default function DashboardLayout() {
             </button>
           </div>
         </header>
-
-        {/* Bot Profile Section (Bottom of Sidebar logic actually inside Sidebar nav) */}
-
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-8 relative">

@@ -115,14 +115,14 @@ export default function Inbox() {
     localStorage.setItem('thread_categories', JSON.stringify(newCats));
   };
 
-  const fetchChats = useCallback(async () => {
-    setLoading(true);
+  const fetchChats = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const r = await fetch(WA_API_URL + '/chats');
       const data = await r.json();
       if (data && Array.isArray(data)) {
         setThreads(prev => {
-          const others = data.filter(t => t && t.id && t.id !== 'demo');
+          const others = data.filter((t: any) => t && t.id && t.id !== 'demo');
           const demo = prev.filter(t => t.id === 'demo');
           return [...others, ...demo];
         });
@@ -137,7 +137,7 @@ export default function Inbox() {
     } catch (e) {
       console.error('Error fetching chats:', e);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, []); // Removed activeThreadId dependency
 
@@ -210,19 +210,22 @@ export default function Inbox() {
     fetchChats();
     fetchSilenced();
 
-    // Poll for silenced status occasionally
-    const interval = setInterval(fetchSilenced, 5000);
+    // Poll for silenced status and chat updates occasionally (auto refreshing)
+    const interval = setInterval(() => {
+      fetchSilenced();
+      fetchChats(false);
+    }, 5000);
 
     return () => { 
       socket.disconnect(); 
       clearInterval(interval);
     };
   }, [fetchChats]);
+  const activeThread = threads.find(t => t.id === activeThreadId) || (threads.length > 0 ? threads[0] : null);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeThreadId, threads]);
-
-  const activeThread = threads.find(t => t.id === activeThreadId) || (threads.length > 0 ? threads[0] : null);
+  }, [activeThreadId, activeThread?.messages?.length]);
 
   const filteredThreads = threads.filter(t => {
     if (!t) return false;
@@ -486,9 +489,14 @@ export default function Inbox() {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-medium text-text-main truncate">{thread.name}</h4>
+                        <h4 className="text-sm font-medium text-text-main truncate" title={thread.name}>
+                          {thread.name}
+                        </h4>
+                        {thread.number && thread.number !== 'Demo' && (
+                          <span className="text-[10px] text-text-muted font-normal tracking-wide">+{thread.number}</span>
+                        )}
                         {thread.unread > 0 && (
-                          <span className="w-4 h-4 bg-brand-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center">{thread.unread}</span>
+                          <span className="w-4 h-4 bg-brand-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center ml-auto">{thread.unread}</span>
                         )}
                       </div>
                       <span className="text-[10px] text-text-muted whitespace-nowrap">{thread.time}</span>
@@ -519,9 +527,9 @@ export default function Inbox() {
                   <div>
                     <h2 className="text-text-main font-medium">{activeThread?.name}</h2>
                     <div className="flex items-center gap-2">
-                      <p className="text-xs text-brand-600 dark:text-brand-400">
+                      <p className="text-xs text-brand-600 dark:text-brand-400 font-medium tracking-wide">
                         {activeThread?.number !== 'Demo' ? `+${activeThread?.number}` : 'Demo'} •
-                        {waConnected ? <span className="text-[#25D366]"> WhatsApp activo</span> : ' Offline'}
+                        {waConnected ? <span className="text-[#25D366] font-normal ml-1"> WhatsApp activo</span> : ' Offline'}
                       </p>
                       {activeThread?.id && activeSessions[activeThread.id] && (
                         <span className="text-[10px] bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-500/20 font-bold uppercase italic">
@@ -590,8 +598,8 @@ export default function Inbox() {
                 {activeThread?.messages?.map(msg => (
                   <div key={msg.id} className={`flex gap-4 ${msg.sender !== 'ai' ? 'justify-end' : ''}`}>
                     {msg.sender === 'ai' && (
-                      <div className="w-9 h-9 rounded-full overflow-hidden bg-white flex-shrink-0 flex items-center justify-center mt-1 shadow-[0_0_15px_rgba(99,102,241,0.25)] border-2 border-brand-500/20 px-1">
-                        <img src={botAvatar} alt="Bot" className="w-[85%] h-[85%] object-contain" />
+                      <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center mt-1 overflow-visible">
+                        <img src={botAvatar} alt="Bot" className="w-full h-full object-contain drop-shadow-xl" />
                       </div>
                     )}
 

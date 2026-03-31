@@ -201,136 +201,308 @@ function initWhatsApp() {
           
           // Send Alert to Agent if configured
           if (match.agentNumber) {
-            const alertMsg = `🔔 *Alerta de Lead (Instagram)*\n\nEl cliente *${contact.pushname || number}* (${number}) ha activado la palabra clave: *${match.keyword}*.\n\nPor favor, atiende la conversación en el dashboard.`;
+            const alertMsg = `👤 *CLIENTE:* ${contact.pushname || 'Sin Nombre'}\n📱 *NÚMERO:* +${number}\n\n🔔 *Alerta de Lead (Instagram)*\nEl cliente ha activado la palabra clave: *${match.keyword}*.\n\n🔗 *Chat Directo:* https://wa.me/${number}\n\nPor favor, atiende la conversación en el dashboard.`;
             await sendAlertToAgents(match.agentNumber, alertMsg);
           }
         }
       }
 
-      // Helper for Business Hours
+      // Lógica de Festivos en Colombia (Ley Emiliani - Ley 51 de 1983)
+      const isColombiaHoliday = (date) => {
+        const year = date.getFullYear();
+        const month = date.getMonth(); // 0-indexed
+        const day = date.getDate();
+
+        // 1. Festivos Fijos (No se mueven)
+        const fixedHolidays = [
+          { m: 0, d: 1 },   // 1 de Enero
+          { m: 4, d: 1 },   // 1 de Mayo
+          { m: 6, d: 20 },  // 20 de Julio
+          { m: 7, d: 7 },   // 7 de Agosto
+          { m: 11, d: 8 },  // 8 de Diciembre
+          { m: 11, d: 25 }, // 25 de Diciembre
+        ];
+        if (fixedHolidays.some(h => h.m === month && h.d === day)) return true;
+
+        // Helper to get Monday after a date
+        const getMovedMonday = (m, d) => {
+          const dObj = new Date(year, m, d);
+          const dayOfWeek = dObj.getDay(); // 0: Sun, 1: Mon
+          if (dayOfWeek === 1) return dObj;
+          const diff = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+          return new Date(year, m, d + diff);
+        };
+
+        // 2. Festivos Ley Emiliani (Se mueven al siguiente lunes si no caen lunes)
+        const emilianiHolidays = [
+          { m: 0, d: 6 },   // Reyes Magos (6 de Enero)
+          { m: 2, d: 19 },  // San José (19 de Marzo)
+          { m: 5, d: 29 },  // San Pedro y San Pablo (29 de Junio)
+          { m: 7, d: 15 },  // Asunción de la Virgen (15 de Agosto)
+          { m: 9, d: 12 },  // Día de la Raza (12 de Octubre)
+          { m: 10, d: 1 },  // Todos los Santos (1 de Noviembre)
+          { m: 10, d: 11 }, // Independencia de Cartagena (11 de Noviembre)
+        ];
+
+        for (const h of emilianiHolidays) {
+          const moved = getMovedMonday(h.m, h.d);
+          if (moved.getMonth() === month && moved.getDate() === day) return true;
+        }
+
+        // 3. Festivos basados en Pascua
+        const getEasterDate = (y) => {
+          const a = y % 19, b = Math.floor(y / 100), c = y % 100;
+          const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+          const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+          const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+          const m = Math.floor((a + 11 * h + 22 * l) / 451);
+          const month = Math.floor((h + l - 7 * m + 114) / 31);
+          const day = ((h + l - 7 * m + 114) % 31) + 1;
+          return new Date(y, month - 1, day);
+        };
+
+        const easter = getEasterDate(year);
+        const addDays = (d, n) => new Date(d.getTime() + n * 24 * 60 * 60 * 1000);
+
+        // Jueves y Viernes Santo
+        const maundyThursday = addDays(easter, -3);
+        const goodFriday = addDays(easter, -2);
+        if (maundyThursday.getMonth() === month && maundyThursday.getDate() === day) return true;
+        if (goodFriday.getMonth() === month && goodFriday.getDate() === day) return true;
+
+        // Festivos móviles movidos a Lunes
+        const ascension = getMovedMonday(easter.getMonth(), easter.getDate() + 39);
+        const corpusChristi = getMovedMonday(easter.getMonth(), easter.getDate() + 60);
+        const sacredHeart = getMovedMonday(easter.getMonth(), easter.getDate() + 68);
+
+        if (ascension.getMonth() === month && ascension.getDate() === day) return true;
+        if (corpusChristi.getMonth() === month && corpusChristi.getDate() === day) return true;
+        if (sacredHeart.getMonth() === month && sacredHeart.getDate() === day) return true;
+
+        return false;
+      };
+
       const isBusinessHours = () => {
-        // America/Bogota time
         const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bogota" }));
         const day = now.getDay();
         const hour = now.getHours();
         
-        // M-F (1 to 5)
+        // 1. Validar Fin de Semana
         if (day === 0 || day === 6) return false;
         
-        // 8 AM to 11:59 AM (8 <= hour < 12) OR 1 PM to 4:59 PM (13 <= hour < 17)
+        // 2. Validar Festivos de Colombia
+        if (isColombiaHoliday(now)) return false;
+        
+        // 3. Validar Horario (8-12, 1-5)
         if ((hour >= 8 && hour < 12) || (hour >= 13 && hour < 17)) {
           return true;
         }
         return false;
       };
 
-      // Check if bot is silenced for this user (Handover to Human)
-      if (humanAgentSessions.has(number)) {
-        console.log(`[WA] 👤 Silenciando bot para ${number} (Atención Humana)`);
-      } else if (!keywordTriggered && autoResponseConfig.enabled && !waitingForOption.has(number)) {
-        // FIRST MESSAGE
-        const inHours = isBusinessHours();
+      // Helper: Finalize Flow with Internal 5s Delay and Alerting
+      const finalizeFlow = async (from, number, state) => {
+        const contactName = contact.name || contact.pushname || 'Sin Nombre';
         
-        if (!inHours) {
-          const outOfHoursMsg = `Hola 👋 gracias por escribirnos a EMDECOB.\nEn este momento estamos fuera de nuestro horario de atención.\n\nHorario de atención:\nLunes a viernes de 8:00 a. m. a 12:00 m. y de 1:00 p. m. a 5:00 p. m.\nNo atendemos sábados, domingos ni festivos.\n\nPor favor, déjanos tu nombre completo y tu mensaje, y te responderemos en nuestro próximo horario hábil 🙌`;
-          await waClient.sendMessage(from, outOfHoursMsg);
-          waitingForOption.set(number, { state: 'awaiting_out_of_hours_data', originalFrom: from, startTime: Date.now() });
-        } else {
+        // 1. Send Alert to Coordinator immediately (internal)
+        let alertMsg = `👤 *CLIENTE:* ${contactName}\n📱 *NÚMERO:* +${number}\n\n🆘 *Alerta de Lead - Cally*\nEl cliente requiere atención humana.\n`;
+        alertMsg += `🔗 *Chat Directo:* https://wa.me/${number}\n\n`;
+        
+        if (state.categoria === 'interesado_servicios') {
+          alertMsg += `📌 *Categoría:* Interesado en Servicios\n🛠️ *Servicio:* ${state.servicio}\n`;
+        } else if (state.categoria === 'servicio_al_cliente') {
+          alertMsg += `📌 *Categoría:* Servicio al Cliente\n📁 *Portafolio:* ${state.portafolio}\n`;
+        } else if (state.status === 'fuera_de_horario') {
+          alertMsg += `🌙 *Estado:* Fuera de Horario (Datos capturados)\n`;
+        }
+
+        // Determine destination number
+        let target = '';
+        if (state.portafolio === 'Crediorbe') target = coordinatorConfig.crediorbe;
+        else if (state.portafolio === 'Efigas') target = coordinatorConfig.efigas;
+        else if (state.portafolio === 'FNA') target = coordinatorConfig.fna;
+        else if (state.portafolio === 'Propiedad horizontal') target = coordinatorConfig.ph;
+        else if (state.servicio === 'gestion_cartera') target = coordinatorConfig.cartera;
+        else if (state.servicio === 'contact_center') target = coordinatorConfig.contact_center;
+        else if (state.servicio === 'emdata') target = coordinatorConfig.emdata;
+        else if (state.servicio === 'asesoria_juridica') target = coordinatorConfig.juridica;
+
+        if (target) {
+          console.log(`[Bot] Enviando alerta a coordinador: ${target}`);
+          await sendAlertToAgents(target, alertMsg);
+        }
+
+        // 2. Internal 5 second delay (not visible to user)
+        setTimeout(async () => {
           try {
-            const media = MessageMedia.fromFilePath(IMG_WELCOME);
-            await waClient.sendMessage(from, media);
-          } catch (e) {
-            console.error('[Cally] Error enviando imagen de bienvenida:', e.message);
-          }
+            await waClient.sendMessage(from, "Gracias por tu información. Pronto uno de nuestros agentes te atenderá 🙌");
+          } catch (e) { console.error("[Bot] Error sending final message:", e.message); }
           
-          const menuMsg = `Hola 👋 gracias por escribirnos a EMDECOB.\nCuéntanos, ¿en qué podemos ayudarte hoy?\n\n1. Manejo de cartera (recuperación de cartera)\n2. Contact center (ventas, servicio o recaudo)\n3. Analítica de datos – EMDATA (tableros en Power BI)\n4. Asesoría jurídica\n5. Servicio al cliente (consulta de deuda o información)\n\nResponde con el número de la opción 👇`;
-          await waClient.sendMessage(from, menuMsg);
-          waitingForOption.set(number, { state: 'main_menu', originalFrom: from, startTime: Date.now() });
-        }
-      } else if (waitingForOption.has(number) && !humanAgentSessions.has(number)) {
-        const body = msg.body.trim().toLowerCase();
-        let userState = waitingForOption.get(number);
-        
-        // Helper to complete flow
-        const completeFlow = async () => {
-          setTimeout(async () => {
-            const endMsg = `Gracias por tu información. Pronto uno de nuestros agentes te atenderá 🙌`;
-            try {
-              await waClient.sendMessage(from, endMsg);
-            } catch (e) { console.error('[Bot] Error final message:', e.message); }
-          }, 5000);
           waitingForOption.delete(number);
-          humanAgentSessions.set(number, { agentName: 'Asignación Automática', startTime: Date.now() });
-        };
+          humanAgentSessions.set(number, { 
+            agentName: "Asignación Automática", 
+            startTime: Date.now() 
+          });
+        }, 5000);
+      };
 
-        if (userState.state === 'main_menu') {
-          if (body === '1' || body.includes('manejo') || body.includes('cartera')) {
-            const reply = `Perfecto 👌\nEn EMDECOB te ayudamos a recuperar cartera de forma estratégica, priorizando, segmentando y optimizando cada gestión para lograr resultados reales.\n\nPor favor indícanos:\n\n- tu nombre completo\n- si tu cartera es administrativa o jurídica\n- de qué sector es`;
-            await waClient.sendMessage(from, reply);
-            waitingForOption.set(number, { ...userState, state: 'awaiting_opt1_data' });
-          } else if (body === '2' || body.includes('contact center')) {
-            const reply = `Perfecto 👌\nNuestro servicio de contact center está enfocado en resultados: ventas, recaudo y servicio al cliente, con procesos estructurados y medición constante.\n\nPor favor indícanos:\n\n- tu nombre completo\n- qué deseas mejorar:\n  • Ventas\n  • Servicio\n  • Recaudo`;
-            await waClient.sendMessage(from, reply);
-            waitingForOption.set(number, { ...userState, state: 'awaiting_opt2_data' });
-          } else if (body === '3' || body.includes('emdata') || body.includes('analítica')) {
-            const reply = `Perfecto 👌\nCon EMDATA llevamos tu información a otro nivel con tableros en Power BI y asesoría personalizada.\n\nPor favor indícanos:\n\n- tu nombre completo\n- qué te gustaría medir o mejorar en tu negocio`;
-            await waClient.sendMessage(from, reply);
-            waitingForOption.set(number, { ...userState, state: 'awaiting_opt3_data' });
-          } else if (body === '4' || body.includes('jurídica') || body.includes('juridica') || body.includes('asesoría')) {
-            const reply = `Perfecto 👌\nSabemos que estos procesos pueden ser complejos, pero con el acompañamiento adecuado todo se vuelve mucho más claro.\n\nEn EMDECOB te guiamos paso a paso para proteger tus intereses y avanzar de forma segura.\n\nPor favor indícanos:\n\n- tu nombre completo\n- un breve resumen de tu caso`;
-            await waClient.sendMessage(from, reply);
-            waitingForOption.set(number, { ...userState, state: 'awaiting_opt4_data' });
-          } else if (body === '5' || body.includes('servicio')) {
-            const reply = `Perfecto 👌\nPara ayudarte con tu solicitud, selecciona el portafolio:\n\n1. Crediorbe\n2. Efigas\n3. FNA\n4. Propiedad horizontal\n\nResponde con el número de la opción 👇`;
-            await waClient.sendMessage(from, reply);
-            waitingForOption.set(number, { ...userState, state: 'awaiting_opt5_portafolio' });
-          } else {
-            const errorMsg = `Por favor responde con el número de una de las opciones disponibles 👇`;
-            await waClient.sendMessage(from, errorMsg);
-          }
-        } 
-        else if (userState.state === 'awaiting_opt5_portafolio') {
-          const portfolioMap = {
-            "1": { name: "Crediorbe", coord: coordinatorConfig.crediorbe },
-            "crediorbe": { name: "Crediorbe", coord: coordinatorConfig.crediorbe },
-            "2": { name: "Efigas", coord: coordinatorConfig.efigas },
-            "efigas": { name: "Efigas", coord: coordinatorConfig.efigas },
-            "3": { name: "FNA", coord: coordinatorConfig.fna },
-            "fna": { name: "FNA", coord: coordinatorConfig.fna },
-            "4": { name: "Propiedad horizontal", coord: coordinatorConfig.ph },
-            "propiedad": { name: "Propiedad horizontal", coord: coordinatorConfig.ph },
-            "horizontal": { name: "Propiedad horizontal", coord: coordinatorConfig.ph },
-            "propiedad horizontal": { name: "Propiedad horizontal", coord: coordinatorConfig.ph }
-          };
-          const selected = portfolioMap[body];
-          if (selected) {
-             const dataRequestMsg = `Por favor indícanos:\n\n- tu nombre completo\n- tu número de cédula`;
-             await waClient.sendMessage(from, dataRequestMsg);
-             waitingForOption.set(number, { ...userState, state: 'awaiting_opt5_data', portfolio: selected });
-          } else {
-             const errorMsg = `Por favor selecciona correctamente el portafolio:\n\n1. Crediorbe\n2. Efigas\n3. FNA\n4. Propiedad horizontal\n\nResponde con el número de la opción 👇`;
-             await waClient.sendMessage(from, errorMsg);
-          }
-        }
-        else if (userState.state.startsWith('awaiting_opt') || userState.state === 'awaiting_out_of_hours_data') {
-          const numberAlertMsg = `🆘 *Alerta de Lead - Cally*\n\nEl cliente *${contact.pushname || number}* (${number}) ha ingresado sus datos y requiere atención humana.\n\nPor favor, revisa el Inbox.`;
+      // --- OUT OF HOURS LOGIC ---
+      if (!inHours) {
+        if (!userState || userState.state !== 'OUT_OF_HOURS_COLLECTING_DATA') {
+          const outOfHoursMsg = `Hola 👋 gracias por escribirnos a EMDECOB.
+En este momento estamos fuera de nuestro horario de atención.
 
-          if (userState.state === 'awaiting_opt5_data' && userState.portfolio) {
-            console.log(`[Cally] 🆘 Intentando enviar alerta a ${userState.portfolio.coord}...`);
-            const alertMsg = `🆘 *Alerta de Portafolio - Cally*\n\nEl cliente *${contact.pushname || number}* (${number}) ha seleccionado el portafolio: *${userState.portfolio.name}*.\n\nPor favor, revisa el Inbox para atender.`;
-            await sendAlertToAgents(userState.portfolio.coord, alertMsg);
-          } else if (userState.state === 'awaiting_opt1_data' && coordinatorConfig.cartera) {
-            await sendAlertToAgents(coordinatorConfig.cartera, numberAlertMsg + "\nOpción: Manejo de Cartera");
-          } else if (userState.state === 'awaiting_opt2_data' && coordinatorConfig.contact_center) {
-            await sendAlertToAgents(coordinatorConfig.contact_center, numberAlertMsg + "\nOpción: Contact Center");
-          } else if (userState.state === 'awaiting_opt3_data' && coordinatorConfig.emdata) {
-            await sendAlertToAgents(coordinatorConfig.emdata, numberAlertMsg + "\nOpción: EMDATA");
-          } else if (userState.state === 'awaiting_opt4_data' && coordinatorConfig.juridica) {
-            await sendAlertToAgents(coordinatorConfig.juridica, numberAlertMsg + "\nOpción: Asesoría Jurídica");
-          }
-          
-          await completeFlow();
+🕗 *Horario de atención:*
+Lunes a viernes de 8:00 a. m. a 12:00 m. y de 1:00 p. m. a 5:00 p. m.
+No atendemos sábados, domingos ni festivos.
+
+Por favor, déjanos tu *nombre completo* y tu *mensaje*, y te responderemos en nuestro próximo horario hábil 🙌`;
+          await waClient.sendMessage(from, outOfHoursMsg);
+          waitingForOption.set(number, { state: 'OUT_OF_HOURS_COLLECTING_DATA', status: 'fuera_de_horario', time: new Date() });
+          return;
+        } else {
+          // Saving out of hours data
+          console.log(`[Bot] Capturando datos fuera de horario para ${number}: ${msg.body}`);
+          await finalizeFlow(from, number, userState);
+          return;
         }
+      }
+
+      // --- IN-HOURS LOGIC (MENU SYSTEM) ---
+      if (!userState && !keywordTriggered) {
+        // First message in hours
+        try {
+          const media = MessageMedia.fromFilePath(IMG_WELCOME);
+          await waClient.sendMessage(from, media);
+        } catch (e) { console.error("[Cally] Error sending welcome img:", e.message); }
+
+        const menuMsg = `Hola 👋 gracias por escribirnos a EMDECOB.
+
+Cuéntanos, ¿en qué podemos ayudarte hoy?
+
+1️⃣ Interesado en nuestros servicios
+2️⃣ Servicio al cliente (consulta de deuda)
+
+Responde con el número de la opción 👇`;
+        await waClient.sendMessage(from, menuMsg);
+        waitingForOption.set(number, { state: 'MAIN_MENU' });
+        return;
+      }
+
+      if (userState) {
+        const body = msg.body.trim().toLowerCase();
+
+        switch (userState.state) {
+          case 'MAIN_MENU':
+            if (body === '1' || body.includes('servicio')) {
+              const servicesMsg = `Perfecto 👌
+En EMDECOB contamos con diferentes soluciones para apoyar la gestión y el crecimiento de tu operación.
+
+Selecciona el servicio de tu interés:
+
+1️⃣ Gestión de cartera
+2️⃣ Contact center (ventas, servicio o recaudo)
+3️⃣ Analítica de datos – EMDATA (Power BI)
+4️⃣ Asesoría jurídica
+
+Responde con el número de la opción 👇`;
+              await waClient.sendMessage(from, servicesMsg);
+              waitingForOption.set(number, { state: 'SERVICES_SUBMENU', categoria: 'interesado_servicios' });
+            } else if (body === '2' || body.includes('cliente') || body.includes('deuda')) {
+              const portfolioMsg = `Perfecto 👌
+Para ayudarte con tu solicitud, selecciona el portafolio:
+
+1️⃣ Crediorbe
+2️⃣ Efigas
+3️⃣ FNA
+4️⃣ Propiedad horizontal
+
+Responde con el número de la opción 👇`;
+              await waClient.sendMessage(from, portfolioMsg);
+              waitingForOption.set(number, { state: 'CS_PORTFOLIO', categoria: 'servicio_al_cliente' });
+            } else {
+              await waClient.sendMessage(from, "Por favor responde con el número de una de las opciones disponibles 👇");
+            }
+            break;
+
+          case 'SERVICES_SUBMENU':
+            if (body === '1' || body.includes('gestión') || body.includes('cartera')) {
+              await waClient.sendMessage(from, `Perfecto 👌
+En EMDECOB te ayudamos a recuperar cartera de forma estratégica, priorizando, segmentando y optimizando cada gestión para lograr resultados reales.
+
+Por favor indícanos:
+- tu nombre completo
+- si tu cartera es administrativa o jurídica
+- de qué sector es`);
+              waitingForOption.set(number, { ...userState, state: 'COLLECTING_CARTERA_DATA', servicio: 'gestion_cartera' });
+            } else if (body === '2' || body.includes('contact')) {
+              await waClient.sendMessage(from, `Perfecto 👌
+Nuestro servicio de contact center está enfocado en resultados: ventas, recaudo y servicio al cliente, con procesos estructurados y medición constante.
+
+Por favor indícanos:
+- tu nombre completo
+- qué deseas mejorar (Ventas, Servicio o Recaudo)`);
+              waitingForOption.set(number, { ...userState, state: 'COLLECTING_CONTACT_DATA', servicio: 'contact_center' });
+            } else if (body === '3' || body.includes('emdata') || body.includes('analítica')) {
+              await waClient.sendMessage(from, `Perfecto 👌
+Con EMDATA llevamos tu información a otro nivel con tableros en Power BI y asesoría personalizada.
+
+Por favor indícanos:
+- tu nombre completo
+- qué te gustaría medir o mejorar en tu negocio`);
+              waitingForOption.set(number, { ...userState, state: 'COLLECTING_EMDATA_DATA', servicio: 'emdata' });
+            } else if (body === '4' || body.includes('asesoría') || body.includes('jurídica')) {
+              await waClient.sendMessage(from, `Perfecto 👌
+Sabemos que estos procesos pueden ser complejos, pero con el acompañamiento adecuado todo se vuelve mucho más claro.
+
+En EMDECOB te guiamos paso a paso para proteger tus intereses y avanzar de forma segura.
+
+Por favor indícanos:
+- tu nombre completo
+- un breve resumen de tu caso`);
+              waitingForOption.set(number, { ...userState, state: 'COLLECTING_JURIDICA_DATA', servicio: 'asesoria_juridica' });
+            } else {
+              await waClient.sendMessage(from, "Por favor responde con el número de una de las opciones disponibles 👇");
+            }
+            break;
+
+          case 'CS_PORTFOLIO':
+            const portfolioMap = {
+              "1": "Crediorbe", "crediorbe": "Crediorbe",
+              "2": "Efigas", "efigas": "Efigas",
+              "3": "FNA", "fna": "FNA",
+              "4": "Propiedad horizontal", "ph": "Propiedad horizontal", "propiedad": "Propiedad horizontal"
+            };
+            const selected = portfolioMap[body];
+            if (selected) {
+              await waClient.sendMessage(from, `Por favor indícanos:\n\n- tu nombre completo\n- tu número de cédula`);
+              waitingForOption.set(number, { ...userState, state: 'COLLECTING_CS_DATA', portafolio: selected, servicio: 'consulta_deuda' });
+            } else {
+              await waClient.sendMessage(from, `Por favor selecciona correctamente el portafolio:
+
+1️⃣ Crediorbe
+2️⃣ Efigas
+3️⃣ FNA
+4️⃣ Propiedad horizontal
+
+Responde con el número de la opción 👇`);
+            }
+            break;
+
+          case 'COLLECTING_CARTERA_DATA':
+          case 'COLLECTING_CONTACT_DATA':
+          case 'COLLECTING_EMDATA_DATA':
+          case 'COLLECTING_JURIDICA_DATA':
+          case 'COLLECTING_CS_DATA':
+            // Robust check: we need enough "information" (just saving what user says for now as per prompt "capture data")
+            if (msg.body.length < 5) {
+              await waClient.sendMessage(from, "Por favor, para poder ayudarte mejor, bríndanos la información completa solicitada de forma amable 🙌");
+            } else {
+              await finalizeFlow(from, number, userState);
+            }
+            break;
+        }
+        return;
       }
 
       const inboxMsg = {

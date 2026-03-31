@@ -20,6 +20,8 @@ services:
       context: ./whatsapp-service
       dockerfile: Dockerfile
     restart: always
+    volumes:
+      - ./whatsapp-service/wa_session_v2:/app/wa_session_v2
     environment:
       - PORT=3001
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
