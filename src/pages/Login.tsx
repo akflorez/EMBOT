@@ -55,8 +55,8 @@ export default function Login() {
       <div className="w-full lg:w-[50%] xl:w-[45%] flex flex-col items-center justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-8 relative bg-white overflow-y-auto">
         
         {/* Top: Logo — Centered & Prominent */}
-        <div className="flex items-center justify-center w-full mb-10 pt-4">
-          <img src={callyLogoBlack} alt="Cally" className="w-[320px] h-auto object-contain" />
+        <div className="flex items-center justify-center w-full mb-12 pt-6">
+          <img src={callyLogoBlack} alt="Cally" className="w-[480px] h-auto object-contain" />
         </div>
 
         {/* Center: Form */}

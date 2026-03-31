@@ -65,12 +65,12 @@ export default function DashboardLayout() {
     <div className="flex h-screen w-full bg-root text-text-main overflow-hidden">
       
       {/* Sidebar */}
-      <aside className="w-64 border-r border-border-subtle bg-card flex flex-col transition-all duration-300">
-        <div className="h-24 flex items-center px-6 border-b border-border-subtle">
+      <aside className="w-72 border-r border-border-subtle bg-card flex flex-col transition-all duration-300">
+        <div className="h-32 flex items-center justify-center px-4 border-b border-border-subtle overflow-hidden">
            <img 
             src={isDark ? callyLogoWhite : callyLogoBlack} 
             alt="Cally" 
-            className="h-16 w-auto object-contain" 
+            className="h-24 w-auto object-contain" 
           />
         </div>
 
@@ -93,13 +93,13 @@ export default function DashboardLayout() {
           ))}
 
           {/* Bot Profile */}
-          <div className="mt-auto pt-6 pb-2 mx-1 flex flex-col items-center justify-end flex-grow text-center overflow-hidden">
-            <div className="w-full h-48 flex justify-center items-end flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)] overflow-visible">
-              <img src={botAvatar} alt="Bot" className="w-[190%] h-[190%] max-w-none object-contain scale-110 drop-shadow-2xl translate-y-4" />
+          <div className="mt-auto pt-8 pb-4 mx-1 flex flex-col items-center justify-end flex-grow text-center overflow-hidden">
+            <div className="w-full h-56 flex justify-center items-end flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)] overflow-visible">
+              <img src={botAvatar} alt="Bot" className="w-[220%] h-[220%] max-w-none object-contain scale-110 drop-shadow-2xl translate-y-6 mix-blend-multiply dark:mix-blend-normal" />
             </div>
-            <div className="z-10 bg-card/80 backdrop-blur-sm -mt-4 px-5 py-2 rounded-full shadow-md border border-border-subtle/50">
-              <p className="text-[19px] font-[900] text-text-main tracking-tight leading-none">Cally</p>
-              <p className="text-[11px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-widest mt-1">Asistente Virtual</p>
+            <div className="z-10 bg-card/80 backdrop-blur-sm -mt-6 px-6 py-2.5 rounded-full shadow-lg border border-border-subtle/50">
+              <p className="text-[22px] font-[900] text-text-main tracking-tight leading-none">Cally</p>
+              <p className="text-[12px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-widest mt-1">Asistente Virtual</p>
             </div>
           </div>
         </nav>
