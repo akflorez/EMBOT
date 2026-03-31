@@ -213,11 +213,11 @@ export default function Dashboard() {
                   {portfolioStats.length > 0 ? portfolioStats.map((p, i) => (
                     <tr key={i} className="hover:bg-hover transition-colors">
                       <td className="p-4 text-sm font-medium text-text-main">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center border border-border-subtle/50 overflow-hidden shadow-sm">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-xl bg-white p-1.5 flex items-center justify-center border border-border-subtle/50 overflow-hidden shadow-md group-hover:scale-105 transition-transform">
                             <img src={p.logo} alt={p.name} className="w-full h-full object-contain" />
                           </div>
-                          {p.name}
+                          <span className="font-bold text-base">{p.name}</span>
                         </div>
                       </td>
                       <td className="p-4 text-sm text-center text-text-muted">{p.active}</td>
@@ -267,11 +267,11 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center text-xs font-medium">
                     <div className="flex items-center gap-2">
                       {s.logo && (
-                        <div className="w-5 h-5 rounded p-0.5 bg-white border border-border-subtle/50 overflow-hidden">
+                        <div className="w-7 h-7 rounded p-1 bg-white border border-border-subtle/50 overflow-hidden shadow-sm">
                           <img src={s.logo} alt={s.name} className="w-full h-full object-contain" />
                         </div>
                       )}
-                      <span className="text-text-main group-hover:text-brand-500 transition-colors">{s.name}</span>
+                      <span className="text-text-main font-semibold group-hover:text-brand-500 transition-colors">{s.name}</span>
                     </div>
                     <span className="text-text-muted">{s.value}%</span>
                   </div>

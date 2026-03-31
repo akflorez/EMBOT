@@ -55,8 +55,8 @@ export default function Login() {
       <div className="w-full lg:w-[50%] xl:w-[45%] flex flex-col items-center justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-8 relative bg-white overflow-y-auto">
         
         {/* Top: Logo — Centered & Prominent */}
-        <div className="flex items-center justify-center w-full mb-8 pt-4">
-          <img src={callyLogoBlack} alt="Cally" className="w-56 h-auto object-contain" />
+        <div className="flex items-center justify-center w-full mb-10 pt-4">
+          <img src={callyLogoBlack} alt="Cally" className="w-[320px] h-auto object-contain" />
         </div>
 
         {/* Center: Form */}
@@ -159,7 +159,7 @@ export default function Login() {
         </div>
 
         {/* Bottom: Footer */}
-        <div className="text-center">
+        <div className="mt-auto pt-8 text-center">
           <p className="text-gray-300 text-[11px]">
             © {new Date().getFullYear()} Cally · Powered by <span className="font-semibold text-gray-400">EMDECOB</span>
           </p>
@@ -185,7 +185,7 @@ export default function Login() {
           </div>
 
           {/* Premium Laptop Mockup - Main Focus */}
-          <div className="w-full max-w-[900px] scale-[1.15] xl:scale-[1.35] transition-all duration-700 hover:scale-[1.18] xl:hover:scale-[1.38] mt-8">
+          <div className="w-full max-w-[1000px] scale-[1.2] xl:scale-[1.4] transition-all duration-700 hover:scale-[1.25] xl:hover:scale-[1.45] mt-8">
             <img 
               src={loginHero} 
               alt="Cally Premium Experience"
