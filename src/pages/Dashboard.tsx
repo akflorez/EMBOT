@@ -214,10 +214,10 @@ export default function Dashboard() {
                     <tr key={i} className="hover:bg-hover transition-colors">
                       <td className="p-4 text-sm font-medium text-text-main">
                         <div className="flex items-center gap-6">
-                          <div className="w-20 h-20 rounded-2xl bg-white p-2 flex items-center justify-center border border-border-subtle/50 overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
+                          <div className="w-16 h-16 rounded-2xl bg-white p-2 flex items-center justify-center border border-border-subtle/50 overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
                             <img src={p.logo} alt={p.name} className="w-full h-full object-contain mix-blend-multiply" />
                           </div>
-                          <span className="font-extrabold text-xl">{p.name}</span>
+                          <span className="font-extrabold text-lg">{p.name}</span>
                         </div>
                       </td>
                       <td className="p-4 text-sm text-center text-text-muted">{p.active}</td>

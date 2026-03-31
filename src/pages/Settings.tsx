@@ -37,6 +37,24 @@ export default function Settings() {
     juridica: ''
   });
 
+  const [schedules, setSchedules] = useState<{
+    businessHours: Record<string, { start: string, end: string }[]>;
+    customHolidays: string[];
+    autoHolidaysEnabled: boolean;
+  }>({
+    businessHours: {
+      "1": [{ start: "08:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
+      "2": [{ start: "08:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
+      "3": [{ start: "08:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
+      "4": [{ start: "08:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
+      "5": [{ start: "08:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
+      "6": [],
+      "0": []
+    },
+    customHolidays: [],
+    autoHolidaysEnabled: true
+  });
+
   // Connect to whatsapp microservice via socket.io
   useEffect(() => {
     const socket = io(WA_SOCKET_URL, {
@@ -69,8 +87,19 @@ export default function Settings() {
 
     fetchSettings();
     fetchCoordinators();
+    fetchSchedules();
     return () => { socket.disconnect(); };
   }, []);
+
+  const fetchSchedules = async () => {
+    try {
+      const response = await fetch(WA_API_URL + '/config/schedules');
+      if (response.ok) {
+        const data = await response.json();
+        setSchedules(data);
+      }
+    } catch {}
+  };
 
   const fetchCoordinators = async () => {
     try {
@@ -125,15 +154,29 @@ export default function Settings() {
       console.error('WhatsApp Service Save Error:', e);
     }
 
-    // 3. Final Feedback
+    // 3. Try Saving to WhatsApp Service (Schedules)
+    try {
+      const schResp = await fetch(WA_API_URL + '/config/schedules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hours: schedules.businessHours,
+          holidays: schedules.customHolidays,
+          autoHolidays: schedules.autoHolidaysEnabled
+        }),
+      });
+      if (schResp.ok) { /* schedules saved */ }
+    } catch (e) {
+      console.error('WhatsApp Schedules Save Error:', e);
+    }
+
+    // 4. Final Feedback
     if (crmSuccess && waSuccess) {
       alert('¡Éxito! Toda la configuración ha sido guardada.');
     } else if (waSuccess && !crmSuccess) {
-      alert('Configuración de Coordinadores guardada correctamente. (Nota: Hubo un problema con el servidor CRM, pero el Bot funcionará con los nuevos números)');
-    } else if (!waSuccess && crmSuccess) {
-      alert('Configuración de CRM guardada, pero NO se pudieron guardar los Coordinadores. Verifica que el servicio de WhatsApp esté activo.');
+      alert('Configuración guardada correctamente.');
     } else {
-      alert('Error crítico: No se pudo conectar con ningún servidor para guardar los cambios.');
+      alert('Hubo un problema al guardar algunos cambios.');
     }
 
     setLoading(false);
@@ -299,6 +342,137 @@ export default function Settings() {
                 onChange={e => setCoordinators({ ...coordinators, crediorbe: e.target.value })}
                 placeholder="57300..."
               />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Schedules & Holidays */}
+      <div className="glass-panel rounded-xl p-6 mb-6">
+        <h2 className="text-xl text-text-main font-semibold mb-2 flex items-center gap-2">
+          <RefreshCw className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+          Horarios y Festivos
+        </h2>
+        <p className="text-xs text-text-muted mb-6">Define cuándo debe responder el bot inteligentemente y cuándo debe capturar datos fuera de horario.</p>
+        
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((dayName, idx) => {
+              const dayIdx = (idx + 1) % 7;
+              const hasHours = schedules.businessHours[dayIdx]?.length > 0;
+              return (
+                <div key={dayIdx} className="bg-surface border border-border-subtle rounded-xl p-4 transition-all hover:border-brand-500/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-bold text-text-main">{dayName}</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={hasHours}
+                        onChange={() => {
+                          const newHours = { ...schedules.businessHours };
+                          if (hasHours) newHours[dayIdx] = [];
+                          else newHours[dayIdx] = [{ start: "08:00", end: "17:00" }];
+                          setSchedules({ ...schedules, businessHours: newHours });
+                        }}
+                      />
+                      <div className="w-9 h-5 bg-border-subtle peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-600"></div>
+                    </label>
+                  </div>
+                  {hasHours ? (
+                    <div className="space-y-2">
+                      {schedules.businessHours[dayIdx].map((range, rIdx) => (
+                        <div key={rIdx} className="flex items-center gap-2">
+                          <input 
+                            type="time" 
+                            className="bg-transparent text-[11px] text-text-main w-full border-0 focus:ring-0 p-0"
+                            value={range.start}
+                            onChange={e => {
+                              const newHours = { ...schedules.businessHours };
+                              newHours[dayIdx][rIdx].start = e.target.value;
+                              setSchedules({ ...schedules, businessHours: newHours });
+                            }}
+                          />
+                          <span className="text-text-muted italic">-</span>
+                          <input 
+                            type="time" 
+                            className="bg-transparent text-[11px] text-text-main w-full border-0 focus:ring-0 p-0"
+                            value={range.end}
+                            onChange={e => {
+                              const newHours = { ...schedules.businessHours };
+                              newHours[dayIdx][rIdx].end = e.target.value;
+                              setSchedules({ ...schedules, businessHours: newHours });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-[10px] text-red-500 font-bold uppercase tracking-widest">Cerrado</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="border-t border-border-subtle/50 pt-6">
+            <h3 className="text-sm font-bold text-text-main mb-4 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-brand-500" />
+              Gestión de Festivos
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={schedules.autoHolidaysEnabled}
+                      onChange={e => setSchedules({ ...schedules, autoHolidaysEnabled: e.target.checked })}
+                    />
+                    <div className="w-11 h-6 bg-border-subtle peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold text-text-main group-hover:text-emerald-500 transition-colors">Festivos Automáticos (Colombia)</span>
+                    <p className="text-[11px] text-text-muted">Incluye automáticamente Ley Emiliani y fechas religiosas.</p>
+                  </div>
+                </label>
+              </div>
+              <div className="space-y-3">
+                <span className="text-[11px] font-bold text-text-muted uppercase tracking-widest">Días No Laborales Adicionales</span>
+                <div className="flex gap-2">
+                  <input 
+                    type="date" 
+                    id="new-holiday"
+                    className="flex-1 bg-surface border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-main focus:border-brand-500 outline-none"
+                  />
+                  <button 
+                    onClick={() => {
+                      const input = document.getElementById('new-holiday') as HTMLInputElement;
+                      if (input?.value && !schedules.customHolidays.includes(input.value)) {
+                        setSchedules(prev => ({ ...prev, customHolidays: [...prev.customHolidays, input.value] }));
+                        input.value = '';
+                      }
+                    }}
+                    className="px-4 py-2 bg-brand-600 text-white rounded-lg text-xs font-bold hover:bg-brand-500 transition-all shadow-md active:scale-95"
+                  >
+                    Agregar
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {schedules.customHolidays.map((holiday, hIdx) => (
+                    <span key={hIdx} className="bg-surface border border-border-subtle px-3 py-1.5 rounded-full text-[11px] text-text-main flex items-center gap-2 group hover:border-red-500/50 transition-all shadow-sm">
+                      {holiday}
+                      <button 
+                        onClick={() => setSchedules(prev => ({ ...prev, customHolidays: prev.customHolidays.filter((_, i) => i !== hIdx) }))}
+                        className="text-text-muted hover:text-red-500 font-bold px-1"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

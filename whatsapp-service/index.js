@@ -57,6 +57,18 @@ const autoRespondedNumbers = new Set();
 const waitingForOption = new Map(); // number -> { timestamp, state, portfolio, startTime }
 const humanAgentSessions = new Map(); // number -> { agentName: string, startTime: number }
 
+let businessHours = {
+  "1": [{ "start": "08:00", "end": "12:00" }, { "start": "13:00", "end": "17:00" }],
+  "2": [{ "start": "08:00", "end": "12:00" }, { "start": "13:00", "end": "17:00" }],
+  "3": [{ "start": "08:00", "end": "12:00" }, { "start": "13:00", "end": "17:00" }],
+  "4": [{ "start": "08:00", "end": "12:00" }, { "start": "13:00", "end": "17:00" }],
+  "5": [{ "start": "08:00", "end": "12:00" }, { "start": "13:00", "end": "17:00" }],
+  "6": [],
+  "0": []
+};
+let customHolidays = []; // Array of strings "YYYY-MM-DD"
+let autoHolidaysEnabled = true;
+
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
 // EMBOT Visuals (Portable relative paths for Docker)
@@ -72,6 +84,9 @@ function loadConfig() {
       if (data.menuConfig) menuConfig = data.menuConfig;
       if (data.keywordConfig) keywordConfig = data.keywordConfig;
       if (data.coordinatorConfig) coordinatorConfig = data.coordinatorConfig;
+      if (data.businessHours) businessHours = data.businessHours;
+      if (data.customHolidays) customHolidays = data.customHolidays;
+      if (typeof data.autoHolidaysEnabled === 'boolean') autoHolidaysEnabled = data.autoHolidaysEnabled;
       console.log('[Config] Configuración cargada desde disco.');
     }
   } catch (e) {
@@ -85,7 +100,10 @@ function saveConfig() {
       autoResponseConfig, 
       menuConfig, 
       keywordConfig,
-      coordinatorConfig 
+      coordinatorConfig,
+      businessHours,
+      customHolidays,
+      autoHolidaysEnabled
     };
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(data, null, 2));
     console.log('[Config] Configuración guardada en disco.');
@@ -222,7 +240,13 @@ function initWhatsApp() {
           { m: 11, d: 8 },  // 8 de Diciembre
           { m: 11, d: 25 }, // 25 de Diciembre
         ];
-        if (fixedHolidays.some(h => h.m === month && h.d === day)) return true;
+        if (autoHolidaysEnabled && fixedHolidays.some(h => h.m === month && h.d === day)) return true;
+        
+        // 1.5. Custom Holidays (User Defined)
+        const dateStr = date.toISOString().split('T')[0];
+        if (customHolidays.includes(dateStr)) return true;
+
+        if (!autoHolidaysEnabled) return false;
 
         // Helper to get Monday after a date
         const getMovedMonday = (m, d) => {
@@ -286,18 +310,21 @@ function initWhatsApp() {
         const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bogota" }));
         const day = now.getDay();
         const hour = now.getHours();
+        const minute = now.getMinutes();
+        const currentTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
         
-        // 1. Validar Fin de Semana
-        if (day === 0 || day === 6) return false;
-        
-        // 2. Validar Festivos de Colombia
+        // 1. Validar Festivos de Colombia y Personalizados
         if (isColombiaHoliday(now)) return false;
         
-        // 3. Validar Horario (8-12, 1-5)
-        if ((hour >= 8 && hour < 12) || (hour >= 13 && hour < 17)) {
-          return true;
-        }
-        return false;
+        // 2. Validar Horario Dinámico
+        const todaySchedules = businessHours[day] || [];
+        if (todaySchedules.length === 0) return false;
+
+        const inRange = todaySchedules.some(range => {
+          return currentTime >= range.start && currentTime < range.end;
+        });
+
+        return inRange;
       };
 
       // Helper: Finalize Flow with Internal 5s Delay and Alerting
@@ -734,6 +761,19 @@ app.post('/config/coordinators', (req, res) => {
   };
   saveConfig();
   res.json({ ok: true, config: coordinatorConfig });
+});
+
+app.get('/config/schedules', (req, res) => {
+  res.json({ businessHours, customHolidays, autoHolidaysEnabled });
+});
+
+app.post('/config/schedules', (req, res) => {
+  const { hours, holidays, autoHolidays } = req.body;
+  if (hours) businessHours = hours;
+  if (holidays) customHolidays = holidays;
+  if (typeof autoHolidays === 'boolean') autoHolidaysEnabled = autoHolidays;
+  saveConfig();
+  res.json({ ok: true });
 });
 
 app.post('/config/handover/start', (req, res) => {
