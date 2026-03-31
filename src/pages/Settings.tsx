@@ -245,110 +245,8 @@ export default function Settings() {
         Configuración del Sistema
       </h1>
 
-      {/* Coordinators Management */}
-      <div className="glass-panel rounded-xl p-6 mb-6 overflow-hidden relative">
-        <div className="absolute top-0 right-0 p-4 opacity-10">
-          <Smartphone className="w-20 h-20" />
-        </div>
-        <h2 className="text-xl text-text-main font-semibold mb-2 flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-          Gestión de Coordinadores (Cally)
-        </h2>
-        <p className="text-xs text-text-muted mb-6">Configura los números de WhatsApp que recibirán las alertas según el portafolio seleccionado por el cliente.</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Lado Izquierdo */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Manejo de Cartera</label>
-              <input
-                type="text"
-                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
-                value={coordinators.cartera}
-                onChange={e => setCoordinators({ ...coordinators, cartera: e.target.value })}
-                placeholder="57300..."
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Contact Center</label>
-              <input
-                type="text"
-                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
-                value={coordinators.contact_center}
-                onChange={e => setCoordinators({ ...coordinators, contact_center: e.target.value })}
-                placeholder="57300..."
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Efigas</label>
-              <input
-                type="text"
-                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
-                value={coordinators.efigas}
-                onChange={e => setCoordinators({ ...coordinators, efigas: e.target.value })}
-                placeholder="57300..."
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Propiedad Horizontal</label>
-              <input
-                type="text"
-                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
-                value={coordinators.ph}
-                onChange={e => setCoordinators({ ...coordinators, ph: e.target.value })}
-                placeholder="57300..."
-              />
-            </div>
-          </div>
-
-          {/* Lado Derecho */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">EMDATA (Analítica)</label>
-              <input
-                type="text"
-                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
-                value={coordinators.emdata}
-                onChange={e => setCoordinators({ ...coordinators, emdata: e.target.value })}
-                placeholder="57300..."
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Asesoría Jurídica</label>
-              <input
-                type="text"
-                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
-                value={coordinators.juridica}
-                onChange={e => setCoordinators({ ...coordinators, juridica: e.target.value })}
-                placeholder="57300..."
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">FNA</label>
-              <input
-                type="text"
-                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
-                value={coordinators.fna}
-                onChange={e => setCoordinators({ ...coordinators, fna: e.target.value })}
-                placeholder="57300..."
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Crediorbe</label>
-              <input
-                type="text"
-                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
-                value={coordinators.crediorbe}
-                onChange={e => setCoordinators({ ...coordinators, crediorbe: e.target.value })}
-                placeholder="57300..."
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Schedules & Holidays */}
-      <div className="glass-panel rounded-xl p-6 mb-6">
+      {/* Schedules & Holidays - MOVED TO TOP FOR VISIBILITY */}
+      <div className="glass-panel rounded-xl p-6 mb-6 border-2 border-brand-500/20">
         <h2 className="text-xl text-text-main font-semibold mb-2 flex items-center gap-2">
           <RefreshCw className="w-5 h-5 text-brand-600 dark:text-brand-400" />
           Horarios y Festivos
@@ -477,6 +375,109 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Coordinators Management */}
+      <div className="glass-panel rounded-xl p-6 mb-6 overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-4 opacity-10">
+          <Smartphone className="w-20 h-20" />
+        </div>
+        <h2 className="text-xl text-text-main font-semibold mb-2 flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+          Gestión de Coordinadores (Cally)
+        </h2>
+        <p className="text-xs text-text-muted mb-6">Configura los números de WhatsApp que recibirán las alertas según el portafolio seleccionado por el cliente.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Lado Izquierdo */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Manejo de Cartera</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.cartera}
+                onChange={e => setCoordinators({ ...coordinators, cartera: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Contact Center</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.contact_center}
+                onChange={e => setCoordinators({ ...coordinators, contact_center: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Efigas</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.efigas}
+                onChange={e => setCoordinators({ ...coordinators, efigas: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Propiedad Horizontal</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.ph}
+                onChange={e => setCoordinators({ ...coordinators, ph: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+          </div>
+
+          {/* Lado Derecho */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">EMDATA (Analítica)</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.emdata}
+                onChange={e => setCoordinators({ ...coordinators, emdata: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Asesoría Jurídica</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.juridica}
+                onChange={e => setCoordinators({ ...coordinators, juridica: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">FNA</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.fna}
+                onChange={e => setCoordinators({ ...coordinators, fna: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">Crediorbe</label>
+              <input
+                type="text"
+                className="w-full bg-surface border border-border-subtle rounded-lg p-3 text-sm text-text-main focus:border-brand-500 outline-none transition-all"
+                value={coordinators.crediorbe}
+                onChange={e => setCoordinators({ ...coordinators, crediorbe: e.target.value })}
+                placeholder="57300..."
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       {/* System Prompt */}
       <div className="glass-panel rounded-xl p-6 mb-6">

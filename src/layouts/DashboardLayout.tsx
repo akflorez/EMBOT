@@ -17,9 +17,9 @@ import {
   Moon,
   LogOut
 } from 'lucide-react';
-import botAvatar from '../assets/bot-avatar.png';
-import callyLogoWhite from '../assets/logo-white.png';
-import callyLogoBlack from '../assets/logo-black.png';
+import botAvatar from '../assets/bot-avatar-clean.png';
+import callyLogoWhite from '../assets/logo-white-clean.png';
+import callyLogoBlack from '../assets/logo-black-clean.png';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
