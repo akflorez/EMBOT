@@ -10,13 +10,12 @@ import {
   Zap, 
   Settings,
   Bell,
-  Search,
   FileText,
   Tag,
   Sun,
   Moon,
   LogOut,
-  Headset
+  Search
 } from 'lucide-react';
 import botAvatar from '../assets/bot-avatar.png';
 import callyLogoWhite from '../assets/logo-white.png';

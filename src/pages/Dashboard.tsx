@@ -8,7 +8,6 @@ import {
   Smartphone,
   TrendingUp,
   BarChart3,
-  Search,
   ChevronDown
 } from 'lucide-react';
 import { StatWidget } from '../components/ui/StatWidget';
