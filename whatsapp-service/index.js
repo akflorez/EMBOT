@@ -12,7 +12,7 @@ const { Pool } = require('pg');
 const crypto = require('crypto');
 
 const pool = new Pool({
-  connectionString: "postgres://neondb_owner:npg_GuSK6s5WFkRA@ep-royal-dream-akghr3kp-pooler.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require",
+  connectionString: process.env.DATABASE_URL || "postgres://neondb_owner:npg_GuSK6s5WFkRA@ep-royal-dream-akghr3kp-pooler.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require",
 });
 
 // Probar y inicializar DB

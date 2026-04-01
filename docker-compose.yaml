@@ -24,6 +24,7 @@ services:
       - ./whatsapp-service/wa_session_v2:/app/wa_session_v2
     environment:
       - PORT=3001
+      - DATABASE_URL=postgres://neondb_owner:npg_GuSK6s5WFkRA@ep-royal-dream-akghr3kp-pooler.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     expose:
       - "3001"
