@@ -9,6 +9,8 @@ whatsapp-service/node_modules/
 whatsapp-service/config.json
 whatsapp-service/wa_session_v2/
 whatsapp-service/wa_session/
+whatsapp-service/wa_session_v2_bkp/
+whatsapp-service/agentLog.json
 .git/
 # Ignorar los binarios pesados o cacheados
 .next/
