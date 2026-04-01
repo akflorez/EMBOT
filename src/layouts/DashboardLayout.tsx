@@ -93,13 +93,12 @@ export default function DashboardLayout() {
           ))}
 
           {/* Bot Profile */}
-          <div className="mt-auto pt-2 pb-4 mx-1 flex flex-col items-center justify-end flex-grow text-center overflow-hidden">
-            <div className="w-full h-52 flex justify-center items-center flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)]">
-              <img src={botAvatar} alt="Bot" className="w-full h-full object-contain scale-125 drop-shadow-2xl translate-y-2 mix-blend-multiply dark:mix-blend-normal" />
+          <div className="mt-auto pt-2 pb-0 mx-1 flex flex-col items-center justify-end flex-grow text-center overflow-hidden">
+            <div className="w-full h-56 flex justify-center items-center flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)]">
+              <img src={botAvatar} alt="Bot" className="w-full h-full object-contain scale-125 drop-shadow-2xl translate-y-0 mix-blend-multiply dark:mix-blend-normal" />
             </div>
-            <div className="z-10 bg-card/80 backdrop-blur-sm -mt-6 px-6 py-2.5 rounded-full shadow-lg border border-border-subtle/50">
-              <p className="text-[22px] font-[900] text-text-main tracking-tight leading-none">Cally</p>
-              <p className="text-[12px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-widest mt-1">Asistente Virtual</p>
+            <div className="z-10 pb-4">
+              <p className="text-[10px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-[0.2em]">Asistente Virtual</p>
             </div>
           </div>
         </nav>
