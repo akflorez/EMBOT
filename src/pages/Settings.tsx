@@ -88,8 +88,23 @@ export default function Settings() {
     fetchSettings();
     fetchCoordinators();
     fetchSchedules();
+    fetchWAStatus();
     return () => { socket.disconnect(); };
   }, []);
+
+  const fetchWAStatus = async () => {
+    try {
+      const response = await fetch(WA_API_URL + '/status');
+      if (response.ok) {
+        const data = await response.json();
+        setWaStatus(data.status);
+        if (data.qr) setWaQR(data.qr);
+        if (data.number) setWaNumber(data.number);
+      }
+    } catch (e) {
+      console.error('Fetch WA Status Error:', e);
+    }
+  };
 
   const fetchSchedules = async () => {
     try {
