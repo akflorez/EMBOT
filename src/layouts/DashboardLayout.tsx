@@ -18,6 +18,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { io } from 'socket.io-client';
+import { WA_API_URL, WA_SOCKET_URL, WA_SOCKET_PATH } from '../config';
 import botAvatar from '../assets/bot-avatar-final.png';
 import callyLogoWhite from '../assets/logo-white-final.png';
 import callyLogoBlack from '../assets/logo-black-final.png';
@@ -79,7 +80,7 @@ export default function DashboardLayout() {
 
   const fetchAlerts = async () => {
     try {
-      const res = await fetch('http://localhost:3002/alerts');
+      const res = await fetch(WA_API_URL + '/alerts');
       if (res.ok) {
         const data = await res.json();
         setAlerts(data);
@@ -92,7 +93,10 @@ export default function DashboardLayout() {
   useEffect(() => {
     fetchAlerts();
     // Socket listener for alerts
-    const socket = io('http://localhost:3002');
+    const socket = io(WA_SOCKET_URL, {
+      path: WA_SOCKET_PATH,
+      transports: ['websocket', 'polling']
+    });
     socket.on('wa:stats_update', () => fetchAlerts());
     return () => { socket.disconnect(); };
   }, []);
