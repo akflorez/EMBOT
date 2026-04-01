@@ -7,6 +7,41 @@ const qrcode = require('qrcode');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const { Pool } = require('pg');
+
+const crypto = require('crypto');
+
+const pool = new Pool({
+  connectionString: "postgres://neondb_owner:npg_GuSK6s5WFkRA@ep-royal-dream-akghr3kp-pooler.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require",
+});
+
+// Probar y inicializar DB
+pool.query('SELECT NOW()', async (err, res) => {
+  if (err) {
+    console.error('[DB] Error de conexión a Neon:', err.message);
+  } else {
+    console.log('[DB] Conectado exitosamente a Neon PostgreSQL.');
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "Messages" (
+          "Id" UUID PRIMARY KEY,
+          "CreatedAt" TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      // Asegurar que existan las columnas necesarias (para evitar errores si la tabla ya existía)
+      await pool.query('ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "ContactName" TEXT');
+      await pool.query('ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "PhoneNumber" TEXT');
+      await pool.query('ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "Category" TEXT');
+      await pool.query('ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "Service" TEXT');
+      await pool.query('ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "Portfolio" TEXT');
+      await pool.query('ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "Content" TEXT');
+      
+      console.log('[DB] Tabla Messages verificada/migrada exitosamente.');
+    } catch (e) {
+      console.error('[DB] Error inicializando tabla:', e.message);
+    }
+  }
+});
 
 const AGENT_LOG_PATH = path.join(__dirname, 'agent_log.json');
 let agentLog = {};
@@ -119,18 +154,19 @@ function initWhatsApp() {
                 dataPath: './wa_session_v2'
             }),
             puppeteer: {
-                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
                 headless: true,
+                timeout: 0, 
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--single-process',
-                    '--disable-gpu'
+                    '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
                 ]
+            },
+            webVersionCache: {
+              type: 'remote',
+              remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-js/main/dist/wppconnect-wa.js'
             }
         });
 
@@ -189,6 +225,16 @@ function initWhatsApp() {
       if (from.includes('@g.us')) return;
 
       const number = from.split('@')[0];
+      console.log(`[WA] 📥 Mensaje recibido de ${number}: "${msg.body}"`);
+
+      // CRITICAL: Check if a human agent is already attending
+      if (humanAgentSessions.has(number)) {
+        console.log(`[WA] 👤 Sesión atendida por humano para ${number}. Ignorando bot.`);
+        return;
+      }
+
+      const userState = waitingForOption.get(number);
+      console.log(`[WA] 🔄 Estado actual para ${number}:`, userState ? userState.state : 'NUEVO');
 
       let contact = {};
       try {
@@ -201,6 +247,7 @@ function initWhatsApp() {
 
       // Secret Developer Command to forcefully clear memory blocks for testing
       if (bodyClean === 'reset cally' || bodyClean === 'reset bot') {
+        console.log(`[WA] 🧹 Comando RESET activado para ${number}`);
         humanAgentSessions.delete(number);
         waitingForOption.delete(number);
         await waClient.sendMessage(from, '✅ Memoria del bot reiniciada para este número. Ya puedes probar el flujo de nuevo.');
@@ -328,7 +375,7 @@ function initWhatsApp() {
       };
 
       // Helper: Finalize Flow with Internal 5s Delay and Alerting
-      const finalizeFlow = async (from, number, state) => {
+      const finalizeFlow = async (from, number, state, answers = '') => {
         const contactName = contact.name || contact.pushname || 'Sin Nombre';
         
         // 1. Send Alert to Coordinator immediately (internal)
@@ -341,6 +388,10 @@ function initWhatsApp() {
           alertMsg += `📌 *Categoría:* Servicio al Cliente\n📁 *Portafolio:* ${state.portafolio}\n`;
         } else if (state.status === 'fuera_de_horario') {
           alertMsg += `🌙 *Estado:* Fuera de Horario (Datos capturados)\n`;
+        }
+
+        if (answers) {
+          alertMsg += `✍️ *DATOS CAPTURADOS:*\n${answers}\n`;
         }
 
         // Determine destination number
@@ -359,6 +410,33 @@ function initWhatsApp() {
           await sendAlertToAgents(target, alertMsg);
         }
 
+        // --- PERSISTENCIA EN NEON ---
+        try {
+          const query = `
+            INSERT INTO "Messages" ("id", "ContactName", "PhoneNumber", "Category", "Service", "Portfolio", "Content", "timestamp")
+            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+          `;
+          const values = [
+            crypto.randomUUID(),
+            contactName,
+            number,
+            state.categoria || 'lead',
+            state.servicio || '',
+            state.portafolio || '',
+            answers || ''
+          ];
+          await pool.query(query, values);
+          console.log(`[DB] Interaction saved to Neon for ${number}`);
+          
+          // Emit updated stats for real-time dashboard
+          const updatedStats = await getStatsJSON();
+          if (updatedStats) {
+            io.emit('wa:stats_update', updatedStats);
+          }
+        } catch (dbErr) {
+          console.error('[DB] Error saving message to Neon:', dbErr.message);
+        }
+
         // 2. Internal 5 second delay (not visible to user)
         setTimeout(async () => {
           try {
@@ -372,6 +450,9 @@ function initWhatsApp() {
           });
         }, 5000);
       };
+
+      const inHours = isBusinessHours();
+      console.log(`[WA] 🕒 Validación de Horario para ${number}: ¿En horario?: ${inHours} | ¿Es festivo?: ${isColombiaHoliday(new Date())}`);
 
       // --- OUT OF HOURS LOGIC ---
       if (!inHours) {
@@ -390,7 +471,7 @@ Por favor, déjanos tu *nombre completo* y tu *mensaje*, y te responderemos en n
         } else {
           // Saving out of hours data
           console.log(`[Bot] Capturando datos fuera de horario para ${number}: ${msg.body}`);
-          await finalizeFlow(from, number, userState);
+          await finalizeFlow(from, number, userState, msg.body);
           return;
         }
       }
@@ -525,7 +606,7 @@ Responde con el número de la opción 👇`);
             if (msg.body.length < 5) {
               await waClient.sendMessage(from, "Por favor, para poder ayudarte mejor, bríndanos la información completa solicitada de forma amable 🙌");
             } else {
-              await finalizeFlow(from, number, userState);
+              await finalizeFlow(from, number, userState, msg.body);
             }
             break;
         }
@@ -552,7 +633,8 @@ Responde con el número de la opción 👇`);
   });
 
   waClient.initialize().catch(err => {
-    console.error('[WA] Error inicializando:', err.message);
+    console.error('[WA] Error crítico al inicializar el cliente WhatsApp:', err);
+    if (err.stack) console.error(err.stack);
     setTimeout(initWhatsApp, 10000);
   });
 }
@@ -572,6 +654,84 @@ app.get('/qr', (req, res) => {
 
 app.get('/messages', (req, res) => {
   res.json(inboxMessages);
+});
+
+const getStatsJSON = async () => {
+  try {
+    const totalLeadsRes = await pool.query('SELECT COUNT(*) FROM "Messages"');
+    const categoriesRes = await pool.query('SELECT "Category", COUNT(*) FROM "Messages" GROUP BY "Category"');
+    const servicesRes = await pool.query('SELECT "Service", COUNT(*) FROM "Messages" WHERE "Service" != \'\' GROUP BY "Service"');
+    const portfoliosRes = await pool.query('SELECT "Portfolio", COUNT(*) FROM "Messages" WHERE "Portfolio" != \'\' GROUP BY "Portfolio"');
+    
+    return {
+      totalLeads: parseInt(totalLeadsRes.rows[0].count),
+      categories: categoriesRes.rows.reduce((acc, curr) => ({ ...acc, [curr.Category]: parseInt(curr.count) }), {}),
+      services: servicesRes.rows.reduce((acc, curr) => ({ ...acc, [curr.Service]: parseInt(curr.count) }), {}),
+      portfolios: portfoliosRes.rows.reduce((acc, curr) => ({ ...acc, [curr.Portfolio]: parseInt(curr.count) }), {})
+    };
+  } catch (err) {
+    console.error('[Stats] Error generated JSON:', err.message);
+    return null;
+  }
+};
+
+app.get('/stats', async (req, res) => {
+  const stats = await getStatsJSON();
+  if (stats) res.json(stats);
+  else res.status(500).json({ error: 'Error fetching statistics' });
+});
+
+app.get('/leads', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT *, "timestamp" as "CreatedAt" FROM "Messages" ORDER BY "timestamp" DESC LIMIT 100');
+    const leads = result.rows.map(row => ({
+      name: row.ContactName || 'Desconocido',
+      phoneNumber: row.PhoneNumber,
+      service: row.Service || 'General',
+      category: row.Category,
+      portfolio: row.Portfolio,
+      content: row.Content,
+      time: new Date(row.timestamp).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+      date: new Date(row.timestamp).toLocaleDateString('es-MX')
+    }));
+    res.json(leads);
+  } catch (err) {
+    console.error('[API] ❌ Error en /leads:', err.message);
+    res.status(500).json({ error: 'Error fetching leads', details: err.message });
+  }
+});
+
+app.get('/agents', async (req, res) => {
+  try {
+    const query = `
+      SELECT u."Name" as name, p.name as portfolio, u."IsActive" as active
+      FROM "Users" u
+      LEFT JOIN "Portfolios" p ON u."PortfolioId" = p.id
+      ORDER BY u."Name" ASC
+    `;
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('[Agents] Error fetching agents:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/alerts', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT *, "timestamp" as "CreatedAt", "id" as "Id" FROM "Messages" ORDER BY "timestamp" DESC LIMIT 10');
+    const alerts = result.rows.map(row => ({
+      id: row.id,
+      title: `Nuevo lead: ${row.ContactName || 'Desconocido'}`,
+      description: row.Content ? (row.Content.substring(0, 50) + '...') : `Interesado en ${row.Service || 'General'}`,
+      time: new Date(row.timestamp).toLocaleTimeString('es-MX'),
+      type: row.Category === 'interesado_servicios' ? 'service' : 'customer'
+    }));
+    res.json(alerts);
+  } catch (err) {
+    console.error('[API] ❌ Error en /alerts:', err.message);
+    res.status(500).json({ error: 'Error fetching alerts' });
+  }
 });
 
 app.get('/chats', async (req, res) => {
@@ -907,9 +1067,9 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => {
-  console.log(`[WA Service] Corriendo en http://localhost:${PORT}`);
+  console.log(`[WA Service] Corriendo en puerto ${PORT}`);
   loadConfig();
   initWhatsApp();
 });

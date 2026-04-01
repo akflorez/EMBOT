@@ -185,7 +185,7 @@ export default function Login() {
           </div>
 
           {/* Premium Laptop Mockup - Main Focus */}
-          <div className="w-full max-w-[1000px] scale-[1.2] xl:scale-[1.4] transition-all duration-700 hover:scale-[1.25] xl:hover:scale-[1.45] mt-8">
+          <div className="w-full max-w-[1000px] scale-[0.95] xl:scale-[1.0] transition-all duration-700 hover:scale-[1.02] xl:hover:scale-[1.05] mt-8">
             <img 
               src={loginHero} 
               alt="Cally Premium Experience"
