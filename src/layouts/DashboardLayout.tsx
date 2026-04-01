@@ -17,9 +17,9 @@ import {
   Moon,
   LogOut
 } from 'lucide-react';
-import botAvatar from '../assets/bot-avatar-perfect.png';
-import callyLogoWhite from '../assets/logo-white-perfect.png';
-import callyLogoBlack from '../assets/logo-black-perfect.png';
+import botAvatar from '../assets/bot-avatar-final.png';
+import callyLogoWhite from '../assets/logo-white-final.png';
+import callyLogoBlack from '../assets/logo-black-final.png';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -66,11 +66,11 @@ export default function DashboardLayout() {
       
       {/* Sidebar */}
       <aside className="w-72 border-r border-border-subtle bg-card flex flex-col transition-all duration-300">
-        <div className="h-24 flex items-center justify-center px-4 border-b border-border-subtle overflow-hidden">
+        <div className="h-20 flex items-center justify-center px-4 border-b border-border-subtle overflow-hidden">
            <img 
             src={isDark ? callyLogoWhite : callyLogoBlack} 
             alt="Cally" 
-            className="h-12 w-auto object-contain" 
+            className="h-10 w-auto object-contain mix-blend-multiply dark:mix-blend-normal" 
           />
         </div>
 
@@ -93,9 +93,9 @@ export default function DashboardLayout() {
           ))}
 
           {/* Bot Profile */}
-          <div className="mt-auto pt-4 pb-4 mx-1 flex flex-col items-center justify-end flex-grow text-center">
-            <div className="w-full h-64 flex justify-center items-center flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)]">
-              <img src={botAvatar} alt="Bot" className="w-[160%] h-[160%] max-w-none object-contain scale-100 drop-shadow-2xl translate-y-0 mix-blend-multiply dark:mix-blend-normal" />
+          <div className="mt-auto pt-2 pb-4 mx-1 flex flex-col items-center justify-end flex-grow text-center">
+            <div className="w-full h-48 flex justify-center items-center flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)]">
+              <img src={botAvatar} alt="Bot" className="w-[130%] h-[130%] max-w-none object-contain scale-100 drop-shadow-2xl translate-y-0 mix-blend-multiply dark:mix-blend-normal" />
             </div>
             <div className="z-10 bg-card/80 backdrop-blur-sm -mt-6 px-6 py-2.5 rounded-full shadow-lg border border-border-subtle/50">
               <p className="text-[22px] font-[900] text-text-main tracking-tight leading-none">Cally</p>

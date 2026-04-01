@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Shield, Smartphone, Clock } from 'lucide-react';
 import loginHero from '../assets/login-hero.png';
-import callyLogoBlack from '../assets/logo-black-perfect.png';
+import callyLogoBlack from '../assets/logo-black-final.png';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -56,7 +56,7 @@ export default function Login() {
         
         {/* Top: Logo — Centered & Prominent */}
         <div className="flex items-center justify-center w-full mb-12 pt-6">
-          <img src={callyLogoBlack} alt="Cally" className="w-[320px] h-auto object-contain" />
+          <img src={callyLogoBlack} alt="Cally" className="w-[240px] h-auto object-contain mix-blend-multiply" />
         </div>
 
         {/* Center: Form */}
