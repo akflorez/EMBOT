@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Shield, Smartphone, Clock } from 'lucide-react';
 import loginHero from '../assets/login-hero.png';
-import callyLogoBlack from '../assets/logo-black-clean.png';
+import callyLogoBlack from '../assets/logo-black-perfect.png';
 
 export default function Login() {
   const [username, setUsername] = useState('');

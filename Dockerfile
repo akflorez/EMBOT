@@ -1,4 +1,4 @@
-# Dockerfile for EMBOT Frontend (Vite)
+# Dockerfile for Cally Frontend (Vite) - Redeploy Trigger v2
 # Stage 1: Build
 FROM node:20-slim AS build
 WORKDIR /app
