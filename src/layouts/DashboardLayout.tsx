@@ -15,7 +15,9 @@ import {
   Tag,
   Sun,
   Moon,
-  LogOut
+  LogOut,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { WA_API_URL, WA_SOCKET_URL, WA_SOCKET_PATH } from '../config';
@@ -38,6 +40,7 @@ const navItems = [
 ];
 
 export default function DashboardLayout() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -105,12 +108,21 @@ export default function DashboardLayout() {
     <div className="flex h-screen w-full bg-root text-text-main overflow-hidden">
       
       {/* Sidebar */}
-      <aside className="w-72 border-r border-border-subtle bg-card flex flex-col transition-all duration-300">
-        <div className="h-20 flex items-center justify-center px-4 border-b border-border-subtle overflow-hidden">
+      <aside className={`relative ${isCollapsed ? 'w-20' : 'w-72'} border-r border-border-subtle bg-card flex flex-col transition-all duration-300 ease-in-out shadow-xl z-20`}>
+        {/* Toggle Button */}
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-3 top-24 w-6 h-6 bg-brand-500 text-white rounded-full flex items-center justify-center hover:bg-brand-600 transition-all shadow-lg z-30"
+          title={isCollapsed ? 'Expandir Menú' : 'Colapsar Menú'}
+        >
+          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        </button>
+
+        <div className={`h-20 flex items-center ${isCollapsed ? 'justify-center' : 'justify-center px-4'} border-b border-border-subtle overflow-hidden transition-all`}>
            <img 
             src={isDark ? callyLogoWhite : callyLogoBlack} 
             alt="Cally" 
-            className={`h-10 w-auto object-contain ${!isDark ? 'mix-blend-multiply' : ''}`} 
+            className={`${isCollapsed ? 'h-8' : 'h-10'} w-auto object-contain transition-all duration-300 ${!isDark ? 'mix-blend-multiply' : ''}`} 
           />
         </div>
 
@@ -128,37 +140,43 @@ export default function DashboardLayout() {
               }
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
-              {item.name}
+              {!isCollapsed && <span className="truncate">{item.name}</span>}
             </NavLink>
           ))}
 
-          {/* Bot Profile */}
-          <div className="mt-auto pt-2 pb-0 mx-1 flex flex-col items-center justify-end flex-grow text-center overflow-hidden">
-            <div className="w-full h-56 flex justify-center items-center flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)]">
-              <img src={botAvatar} alt="Bot" className="w-full h-full object-contain scale-125 drop-shadow-2xl translate-y-0 mix-blend-multiply dark:mix-blend-normal" />
+          {/* Bot Profile - Hidden when collapsed */}
+          {!isCollapsed && (
+            <div className="mt-auto pt-2 pb-0 mx-1 flex flex-col items-center justify-end flex-grow text-center overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="w-full h-56 flex justify-center items-center flex-shrink-0 drop-shadow-[0_12px_24px_rgba(34,197,94,0.3)]">
+                <img src={botAvatar} alt="Bot" className="w-full h-full object-contain scale-125 drop-shadow-2xl translate-y-0 mix-blend-multiply dark:mix-blend-normal" />
+              </div>
+              <div className="z-10 pb-4">
+                <p className="text-[10px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-[0.2em]">Asistente Virtual</p>
+              </div>
             </div>
-            <div className="z-10 pb-4">
-              <p className="text-[10px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-[0.2em]">Asistente Virtual</p>
-            </div>
-          </div>
+          )}
         </nav>
 
         <div className="p-4 border-t border-border-subtle mt-auto">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center font-bold text-xs text-white border border-white/10 shadow-sm">
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2`}>
+            <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center font-bold text-xs text-white border border-white/10 shadow-sm flex-shrink-0">
               {initials}
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-medium text-text-main truncate">{userName}</span>
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{userRole}</span>
-            </div>
-            <button 
-              onClick={handleLogout}
-              className="ml-auto p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-              title="Cerrar Sesión"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            {!isCollapsed && (
+              <div className="flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
+                <span className="text-sm font-medium text-text-main truncate">{userName}</span>
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{userRole}</span>
+              </div>
+            )}
+            {!isCollapsed && (
+              <button 
+                onClick={handleLogout}
+                className="ml-auto p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                title="Cerrar Sesión"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       </aside>
