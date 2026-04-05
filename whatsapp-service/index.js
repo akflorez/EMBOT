@@ -148,90 +148,92 @@ function saveConfig() {
 }
 
 function initWhatsApp() {
-  waClient = new Client({
-            authStrategy: new LocalAuth({
-                clientId: 'embot-session',
-                dataPath: './wa_session_v2'
-            }),
-            puppeteer: {
-                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-                headless: true,
-                timeout: 0, 
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
-                ]
-            },
-            webVersionCache: {
-              type: 'remote',
-              remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-js/main/dist/wppconnect-wa.js'
-            }
-        });
+  console.log('[WA] Iniciando initWhatsApp con diagnostico avanzado...');
+  try {
+    waClient = new Client({
+      authStrategy: new LocalAuth({
+          clientId: 'embot-session',
+          dataPath: './wa_session_v2'
+      }),
+      puppeteer: {
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+          headless: true,
+          timeout: 60000, 
+          args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-gpu',
+              '--no-first-run',
+              '--no-zygote',
+              '--single-process'
+          ]
+      },
+      webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-js/main/dist/wppconnect-wa.js'
+      }
+    });
 
-  waClient.on('qr', async (qr) => {
-    console.log('[WA] QR recibido, emitiendo al frontend...');
-    currentStatus = 'qr';
-    currentQR = await qrcode.toDataURL(qr);
-    io.emit('wa:status', { status: 'qr', qr: currentQR });
-  });
-
-  waClient.on('authenticated', () => {
-    console.log('[WA] Autenticado correctamente.');
-    currentStatus = 'authenticated';
-    currentQR = null;
-    io.emit('wa:status', { status: 'authenticated' });
-  });
-
-  waClient.on('ready', async () => {
-    console.log('[WA] Cliente listo!');
-    currentStatus = 'ready';
-    const info = waClient.info;
-    connectedNumber = info?.wid?.user || 'Desconocido';
-    io.emit('wa:status', { status: 'ready', number: connectedNumber });
-  });
-
-  waClient.on('disconnected', (reason) => {
-    console.log('[WA] Desconectado:', reason);
-    currentStatus = 'disconnected';
-    connectedNumber = null;
-    io.emit('wa:status', { status: 'disconnected' });
-    // Re-initialize after a short delay
-    setTimeout(initWhatsApp, 5000);
-  });
-
-  // Helper to send alert to one or more agents
-  const sendAlertToAgents = async (numbersStr, alertMsg) => {
-    if (!numbersStr) return;
-    const targets = numbersStr.split(',').map(s => s.trim()).filter(s => s);
-    for (const raw of targets) {
-      const agentId = raw.includes('@') ? raw : `${raw}@c.us`;
+    waClient.on('qr', async (qr) => {
+      console.log('[WA] 📲 QR recibido del cliente.');
       try {
-        console.log(`[WA] 🔔 Enviando alerta a asesor: ${agentId}`);
-        await waClient.sendMessage(agentId, alertMsg);
-      } catch (e) {
-        console.error(`[WA] Error enviando alerta a ${agentId}:`, e.message);
+        currentStatus = 'qr';
+        currentQR = await qrcode.toDataURL(qr);
+        io.emit('wa:status', { status: 'qr', qr: currentQR });
+      } catch (err) {
+        console.error('[WA] ❌ Error convirtiendo QR:', err.message);
       }
-    }
-  };
+    });
 
-  waClient.on('message', async (msg) => {
-    try {
-      if (msg.fromMe) return; // Ignore messages sent by the bot itself
-      
-      const from = msg.from || '';
-      if (from.includes('@broadcast') || from.includes('status') || !msg.body?.trim()) return;
-      if (from.includes('@g.us')) return;
+    waClient.on('authenticated', () => {
+      console.log('[WA] ✅ Autenticado correctamente.');
+      currentStatus = 'authenticated';
+      currentQR = null;
+      io.emit('wa:status', { status: 'authenticated' });
+    });
 
-      const number = from.split('@')[0];
-      console.log(`[WA] 📥 Mensaje recibido de ${number}: "${msg.body}"`);
+    waClient.on('ready', async () => {
+      console.log('[WA] 🚀 Cliente listo y operativo!');
+      currentStatus = 'ready';
+      const info = waClient.info;
+      connectedNumber = info?.wid?.user || 'Desconocido';
+      io.emit('wa:status', { status: 'ready', number: connectedNumber });
+    });
 
-      // CRITICAL: Check if a human agent is already attending
-      if (humanAgentSessions.has(number)) {
-        console.log(`[WA] 👤 Sesión atendida por humano para ${number}. Ignorando bot.`);
-        return;
+    waClient.on('disconnected', (reason) => {
+      console.log('[WA] ⚠️ Desconectado:', reason);
+      currentStatus = 'disconnected';
+      connectedNumber = null;
+      io.emit('wa:status', { status: 'disconnected' });
+      setTimeout(initWhatsApp, 5000);
+    });
+
+    // Helper inside initWhatsApp to access waClient
+    const sendAlertToAgents = async (numbersStr, alertMsg) => {
+      if (!numbersStr) return;
+      const targets = numbersStr.split(',').map(s => s.trim()).filter(Boolean);
+      for (const raw of targets) {
+        const agentId = raw.includes('@') ? raw : `${raw}@c.us`;
+        try {
+          await waClient.sendMessage(agentId, alertMsg);
+        } catch (e) {
+          console.error(`[WA] Error enviando alerta a ${agentId}:`, e.message);
+        }
       }
+    };
+
+    waClient.on('message', async (msg) => {
+      try {
+        if (msg.fromMe) return; 
+        const from = msg.from || '';
+        if (from.includes('@broadcast') || from.includes('status') || !msg.body?.trim()) return;
+        if (from.includes('@g.us')) return;
+
+        const number = from.split('@')[0];
+        console.log(`[WA] 📥 Mensaje de ${number}: "${msg.body}"`);
+
+        if (humanAgentSessions.has(number)) return;
 
       const userState = waitingForOption.get(number);
       console.log(`[WA] 🔄 Estado actual para ${number}:`, userState ? userState.state : 'NUEVO');
@@ -632,11 +634,15 @@ Responde con el número de la opción 👇`);
     }
   });
 
-  waClient.initialize().catch(err => {
-    console.error('[WA] Error crítico al inicializar el cliente WhatsApp:', err);
-    if (err.stack) console.error(err.stack);
-    setTimeout(initWhatsApp, 10000);
-  });
+    waClient.initialize().catch(err => {
+      console.error('[WA] Error crítico al inicializar el cliente WhatsApp:', err);
+      if (err.stack) console.error(err.stack);
+      setTimeout(initWhatsApp, 10000);
+    });
+
+  } catch (err) {
+    console.error('[WA] ❌ Error fatal en initWhatsApp:', err.message);
+  }
 }
 
 app.get('/health', (req, res) => {
